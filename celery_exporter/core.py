@@ -7,16 +7,14 @@ __all__ = ('CeleryExporter',)
 
 class CeleryExporter():
 
-    def __init__(self, broker_url, listen_address, max_tasks, namespace, transport_options, enable_events):
+    def __init__(self, broker_url, listen_address, max_tasks=10000, namespace='celery', transport_options={}, enable_events=False):
         self._listen_address = listen_address
         self._max_tasks = max_tasks
         self._namespace = namespace
         self._enable_events = enable_events
 
         self._app = celery.Celery(broker=broker_url)
-
-        if transport_options:
-            self._app.conf.broker_transport_options = transport_options
+        self._app.conf.broker_transport_options = transport_options
 
     def start(self):
 

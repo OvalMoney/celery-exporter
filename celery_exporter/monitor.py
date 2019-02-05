@@ -35,14 +35,7 @@ class TaskThread(threading.Thread):
         with self._state._mutex:
             if celery.events.group_from(evt['type']) == 'task':
                 evt_state = evt['type'][5:]
-                try:
-                    # Celery 4
-                    state = celery.events.state.TASK_EVENT_TO_STATE[evt_state]
-                except AttributeError:  # pragma: no cover
-                    # Celery 3
-                    task = celery.events.state.Task() # pylint: disable=E1101
-                    task.event(evt_state)
-                    state = task.state
+                state = celery.events.state.TASK_EVENT_TO_STATE[evt_state]
                 if state == celery.states.STARTED:
                     self._observe_latency(evt)
                 self._collect_tasks(evt, state)

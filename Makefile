@@ -1,4 +1,4 @@
-.PHONY: help
+.PHONY: help clean test
 .DEFAULT_GOAL := help
 
 DOCKER_REPO="ovalmoney/celery-exporter"
@@ -15,10 +15,14 @@ for line in sys.stdin:
 endef
 export PRINT_HELP_PYSCRIPT
 
-all: clean docker_build ## Clean and Build
+all: clean test docker_build ## Clean and Build
 
 clean: ## Clean folders
 	rm -rf dist/ *.egg-info
+
+test: ## Run tests and coverage
+	coverage run -m pytest test/ \
+  && coverage report
 
 docker_build: ## Build Docker file
 	export DOCKER_REPO

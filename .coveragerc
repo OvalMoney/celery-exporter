@@ -1,5 +1,7 @@
 [run]
 source = celery_exporter
+omit =
+    celery_exporter/__main__.py
 
 [report]
 fail_under = 100

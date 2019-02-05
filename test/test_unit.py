@@ -7,22 +7,15 @@ from celery.events import Event
 from celery.utils import uuid
 from prometheus_client import REGISTRY
 from unittest import TestCase
-try:
-    from unittest.mock import patch
-except ImportError:
-    from mock import patch
+from unittest.mock import patch
 
 from celery_exporter.monitor import (
     WorkerMonitoringThread, TaskThread, EnableEventsThread, setup_metrics
 )
 
-from celery_test_utils import get_celery_app
+from celery_test_utils import BaseTest, get_celery_app
 
-
-class TestMockedCelery(TestCase):
-    task = 'my_task'
-    namespace = 'celery'
-    max_tasks = 10000
+class TestMockedCelery(BaseTest):  
 
     def setUp(self):
         self.app = get_celery_app()

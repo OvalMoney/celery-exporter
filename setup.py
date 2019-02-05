@@ -10,10 +10,11 @@ setup(
     name='celery-exporter',
     description="Prometheus metrics exporter for Celery",
     long_description=long_description,
-    version='1.0.0',
+    long_description_content_type='text/markdown',
+    version='1.0.1',
     author='Fabio Todaro',
     license='MIT',
-    author_email='ft@ovalmoney.com',
+    author_email='fbregist@gmail.com',
     url='https://github.com/OvalMoney/celery-exporter',
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -21,6 +22,7 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3 :: Only',
+        'Operating System :: OS Independent',
     ],
     packages=[
         'celery_exporter',
