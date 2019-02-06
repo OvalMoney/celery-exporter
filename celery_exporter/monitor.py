@@ -57,9 +57,7 @@ class TaskThread(threading.Thread):
         if state in celery.states.READY_STATES:
             self._incr_ready_task(evt, state)
         else:
-            # add event to list of in-progress tasks
-            self._state._event(evt)
-        self._collect_unready_tasks()
+            self._incr_unready_task(evt, state)
 
     def _incr_ready_task(self, evt, state):
         try:
@@ -73,18 +71,14 @@ class TaskThread(threading.Thread):
                 TASKS_RUNTIME.labels(namespace=self._namespace, name=name) \
                              .observe(evt['runtime'])
 
-    def _collect_unready_tasks(self):
-
-        # count unready tasks by state and name
-        cnt = collections.Counter(
-            (t.state, t.name) for t in self._state.tasks.values() if t.name)
-        self._known_states_names.update(cnt.elements())
-        for task_state in self._known_states_names:
-            TASKS.labels(
-                namespace=self._namespace,
-                name=task_state[1],
-                state=task_state[0],
-            ).set(cnt[task_state])
+    def _incr_unready_task(self, evt, state):
+        self._state._event(evt)
+        try:
+            name = self._state.tasks[evt['uuid']].name or ''
+        except (KeyError, AttributeError):  # pragma: no cover
+            name = ''
+        finally:
+            TASKS.labels(namespace=self._namespace, name=name, state=state).inc()
 
     def _monitor(self):  # pragma: no cover
         while True:
@@ -152,15 +146,15 @@ def setup_metrics(app, namespace):
     This initializes the available metrics with default values so that
     even before the first event is received, data can be exposed.
     """
-    WORKERS.labels(namespace=namespace).set(0)
+    WORKERS.labels(namespace=namespace)
     LATENCY.labels(namespace=namespace)
     try:
         registered_tasks = app.control.inspect().registered_tasks().values()
     except Exception:  # pragma: no cover
         for metric in TASKS.collect():
             for name, labels, cnt in metric.samples:
-                TASKS.labels(**labels).set(0)
+                TASKS.labels(**labels)
     else:
         for state in celery.states.ALL_STATES:
             for task_name in set(chain.from_iterable(registered_tasks)):
-                TASKS.labels(namespace=namespace, name=task_name, state=state).set(0)
+                TASKS.labels(namespace=namespace, name=task_name, state=state)

@@ -7,11 +7,11 @@ Celery Exporter is a Prometheus metrics exporter for Celery 4, written in python
 
 Here the list of exposed metrics:
 
-* `celery_tasks` exposes the number of tasks currently known to the queue
+* `celery_tasks_total` exposes the number of tasks currently known to the queue
   labeled by `name`, `state` and `namespace`.
 * `celery_tasks_runtime_seconds` tracks the number of seconds tasks take
   until completed as histogram labeled by `name` and `namespace`
-* `celery_task_latency` exposes a histogram of task latency, i.e. the time until
+* `celery_tasks_latency_seconds` exposes a histogram of task latency, i.e. the time until
   tasks are picked up by a worker
 * `celery_workers` exposes the number of currently probably alive workers
 
@@ -81,22 +81,22 @@ If you then look at the exposed metrics, you should see something like this:
 # HELP celery_workers Number of alive workers
 # TYPE celery_workers gauge
 celery_workers{namespace="celery"} 1.0
-# HELP celery_tasks Number of tasks per state
-# TYPE celery_tasks gauge
-celery_tasks{name="my_app.tasks.calculate_something",namespace="celery",state="RECEIVED"} 0.0
-celery_tasks{name="my_app.tasks.calculate_something",namespace="celery",state="PENDING"} 0.0
-celery_tasks{name="my_app.tasks.calculate_something",namespace="celery",state="STARTED"} 0.0
-celery_tasks{name="my_app.tasks.calculate_something",namespace="celery",state="RETRY"} 0.0
-celery_tasks{name="my_app.tasks.calculate_something",namespace="celery",state="FAILURE"} 0.0
-celery_tasks{name="my_app.tasks.calculate_something",namespace="celery",state="REVOKED"} 0.0
-celery_tasks{name="my_app.tasks.calculate_something",namespace="celery",state="SUCCESS"} 1.0
-celery_tasks{name="my_app.tasks.fetch_some_data",namespace="celery",state="RECEIVED"} 3.0
-celery_tasks{name="my_app.tasks.fetch_some_data",namespace="celery",state="PENDING"} 0.0
-celery_tasks{name="my_app.tasks.fetch_some_data",namespace="celery",state="STARTED"} 1.0
-celery_tasks{name="my_app.tasks.fetch_some_data",namespace="celery",state="RETRY"} 2.0
-celery_tasks{name="my_app.tasks.fetch_some_data",namespace="celery",state="FAILURE"} 1.0
-celery_tasks{name="my_app.tasks.fetch_some_data",namespace="celery",state="REVOKED"} 0.0
-celery_tasks{name="my_app.tasks.fetch_some_data",namespace="celery",state="SUCCESS"} 7.0
+# HELP celery_tasks_total Number of tasks per state
+# TYPE celery_tasks_total gauge
+celery_tasks_total{name="my_app.tasks.calculate_something",namespace="celery",state="RECEIVED"} 0.0
+celery_tasks_total{name="my_app.tasks.calculate_something",namespace="celery",state="PENDING"} 0.0
+celery_tasks_total{name="my_app.tasks.calculate_something",namespace="celery",state="STARTED"} 0.0
+celery_tasks_total{name="my_app.tasks.calculate_something",namespace="celery",state="RETRY"} 0.0
+celery_tasks_total{name="my_app.tasks.calculate_something",namespace="celery",state="FAILURE"} 0.0
+celery_tasks_total{name="my_app.tasks.calculate_something",namespace="celery",state="REVOKED"} 0.0
+celery_tasks_total{name="my_app.tasks.calculate_something",namespace="celery",state="SUCCESS"} 1.0
+celery_tasks_total{name="my_app.tasks.fetch_some_data",namespace="celery",state="RECEIVED"} 3.0
+celery_tasks_total{name="my_app.tasks.fetch_some_data",namespace="celery",state="PENDING"} 0.0
+celery_tasks_total{name="my_app.tasks.fetch_some_data",namespace="celery",state="STARTED"} 1.0
+celery_tasks_total{name="my_app.tasks.fetch_some_data",namespace="celery",state="RETRY"} 2.0
+celery_tasks_total{name="my_app.tasks.fetch_some_data",namespace="celery",state="FAILURE"} 1.0
+celery_tasks_total{name="my_app.tasks.fetch_some_data",namespace="celery",state="REVOKED"} 0.0
+celery_tasks_total{name="my_app.tasks.fetch_some_data",namespace="celery",state="SUCCESS"} 7.0
 # HELP celery_tasks_runtime_seconds Task runtime (seconds)
 # TYPE celery_tasks_runtime_seconds histogram
 celery_tasks_runtime_seconds_bucket{le="0.005",name="my_app.tasks.calculate_something",namespace="celery"} 29.0
@@ -136,27 +136,27 @@ celery_tasks_runtime_seconds_sum{name="my_app.tasks.fetch_some_data",namespace="
 # TYPE celery_tasks_runtime_seconds_created gauge
 celery_tasks_runtime_seconds_created{name="my_app.tasks.calculate_something",namespace="celery"} 1.548944949810905e+09
 celery_tasks_runtime_seconds_created{name="my_app.tasks.fetch_some_data",namespace="celery"} 1.5489449550243628e+09
-# HELP celery_task_latency Seconds between a task is received and started.
-# TYPE celery_task_latency histogram
-celery_task_latency_bucket{namespace="celery",le="0.005"} 2.0
-celery_task_latency_bucket{namespace="celery",le="0.01"} 3.0
-celery_task_latency_bucket{namespace="celery",le="0.025"} 4.0
-celery_task_latency_bucket{namespace="celery",le="0.05"} 4.0
-celery_task_latency_bucket{namespace="celery",le="0.075"} 5.0
-celery_task_latency_bucket{namespace="celery",le="0.1"} 5.0
-celery_task_latency_bucket{namespace="celery",le="0.25"} 5.0
-celery_task_latency_bucket{namespace="celery",le="0.5"} 5.0
-celery_task_latency_bucket{namespace="celery",le="0.75"} 5.0
-celery_task_latency_bucket{namespace="celery",le="1.0"} 5.0
-celery_task_latency_bucket{namespace="celery",le="2.5"} 8.0
-celery_task_latency_bucket{namespace="celery",le="5.0"} 11.0
-celery_task_latency_bucket{namespace="celery",le="7.5"} 11.0
-celery_task_latency_bucket{namespace="celery",le="10.0"} 11.0
-celery_task_latency_bucket{namespace="celery",le="+Inf"} 11.0
-celery_task_latency_count{namespace="celery"} 11.0
-celery_task_latency_sum{namespace="celery"} 16.478713035583496
+# HELP celery_tasks_latency_seconds Seconds between a task is received and started.
+# TYPE celery_tasks_latency_seconds histogram
+celery_tasks_latency_seconds_bucket{namespace="celery",le="0.005"} 2.0
+celery_tasks_latency_seconds_bucket{namespace="celery",le="0.01"} 3.0
+celery_tasks_latency_seconds_bucket{namespace="celery",le="0.025"} 4.0
+celery_tasks_latency_seconds_bucket{namespace="celery",le="0.05"} 4.0
+celery_tasks_latency_seconds_bucket{namespace="celery",le="0.075"} 5.0
+celery_tasks_latency_seconds_bucket{namespace="celery",le="0.1"} 5.0
+celery_tasks_latency_seconds_bucket{namespace="celery",le="0.25"} 5.0
+celery_tasks_latency_seconds_bucket{namespace="celery",le="0.5"} 5.0
+celery_tasks_latency_seconds_bucket{namespace="celery",le="0.75"} 5.0
+celery_tasks_latency_seconds_bucket{namespace="celery",le="1.0"} 5.0
+celery_tasks_latency_seconds_bucket{namespace="celery",le="2.5"} 8.0
+celery_tasks_latency_seconds_bucket{namespace="celery",le="5.0"} 11.0
+celery_tasks_latency_seconds_bucket{namespace="celery",le="7.5"} 11.0
+celery_tasks_latency_seconds_bucket{namespace="celery",le="10.0"} 11.0
+celery_tasks_latency_seconds_bucket{namespace="celery",le="+Inf"} 11.0
+celery_tasks_latency_seconds_count{namespace="celery"} 11.0
+celery_tasks_latency_seconds_sum{namespace="celery"} 16.478713035583496
 # TYPE celery_task_latency_created gauge
-celery_task_latency_created{namespace="celery"} 1.5489449475378375e+09
+celery_task_latency_seconds_created{namespace="celery"} 1.5489449475378375e+09
 ```
 
 ### Inspired by @zerok work
