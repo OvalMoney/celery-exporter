@@ -4,6 +4,7 @@ import os
 import signal
 import sys
 import time
+from decimal import Decimal
 
 import click
 from .core import CeleryExporter
@@ -21,7 +22,7 @@ LOG_FORMAT = '[%(asctime)s] %(name)s:%(levelname)s: %(message)s'
 @click.option('--listen-address', '-l', type=str, show_default=True, show_envvar=True,
                 default='0.0.0.0:9540',
                 help='Address the HTTPD should listen on.')
-@click.option('--max-tasks', '-m', type=int, show_default=True, show_envvar=True,
+@click.option('--max-tasks', '-m', type=Decimal, show_default=True, show_envvar=True,
                 default='10000',
                 help='Tasks cache size.')
 @click.option('--namespace', '-n', type=str, show_default=True, show_envvar=True,
@@ -46,6 +47,8 @@ def main(broker_url, listen_address, max_tasks, namespace, transport_options, en
     if tz:
         os.environ['TZ'] = tz
         time.tzset()
+
+    max_tasks = int(max_tasks)
 
     if transport_options:
         try:
