@@ -55,31 +55,12 @@ class TaskThread(threading.Thread):
                     evt['local_received'] - prev_evt.local_received)
 
     def _collect_tasks(self, evt, state):
-        if state in celery.states.READY_STATES:
-            self._incr_ready_task(evt, state)
-        else:
-            self._incr_unready_task(evt, state)
+        (name, state, runtime) = self._state.collect(evt, state)
+        if runtime is not None:
+            TASKS_RUNTIME.labels(namespace=self._namespace, name=name).observe(runtime)
 
-    def _incr_ready_task(self, evt, state):
-        try:
-            # remove event from list of in-progress tasks
-            name = self._state.tasks.pop(evt['uuid']).name or ''
-        except (KeyError, AttributeError):  # pragma: no cover
-            name = ''
-        finally:
-            TASKS.labels(namespace=self._namespace, name=name, state=state).inc()
-            if 'runtime' in evt:
-                TASKS_RUNTIME.labels(namespace=self._namespace, name=name) \
-                             .observe(evt['runtime'])
+        TASKS.labels(namespace=self._namespace, name=name, state=state).inc()
 
-    def _incr_unready_task(self, evt, state):
-        self._state._event(evt)
-        try:
-            name = self._state.tasks[evt['uuid']].name or ''
-        except (KeyError, AttributeError):  # pragma: no cover
-            name = ''
-        finally:
-            TASKS.labels(namespace=self._namespace, name=name, state=state).inc()
 
     def _monitor(self):  # pragma: no cover
         while True:

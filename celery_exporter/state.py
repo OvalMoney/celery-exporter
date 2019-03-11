@@ -1,5 +1,7 @@
 import threading
 from operator import itemgetter
+
+from celery.states import READY_STATES
 from celery.utils.functional import LRUCache
 from celery.events.state import Task, Worker
 
@@ -36,4 +38,29 @@ class CustomState:
             task.event(subject, timestamp, local_received, evt)
 
             return (task, task_created), subject
+
+    def event(self, evt):
+        with self._mutex:
+            return self._event(evt)
+
+    def collect(self, evt, state):
+        runtime = None
+        if state in READY_STATES:
+            try:
+                name = self.tasks.pop(evt['uuid']).name or ''
+            except (KeyError, AttributeError):
+                name = ''
+            finally:
+                if 'runtime' in evt:
+                    runtime = evt['runtime']
+                return (name, state, runtime)
+        else:
+            self._event(evt)
+            try:
+                name = self.tasks[evt['uuid']].name or ''
+            except (KeyError, AttributeError):
+                name = ''
+            finally:
+                return (name, state, runtime)
+
 
