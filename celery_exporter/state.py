@@ -10,20 +10,18 @@ class CustomState:
     event_count = 0
     task_count = 0
 
-    def __init__(self, max_tasks_in_memory = 10000):
-       self.tasks = LRUCache(max_tasks_in_memory)
-       self._mutex = threading.Lock()
+    def __init__(self, max_tasks_in_memory=10000):
+        self.tasks = LRUCache(max_tasks_in_memory)
+        self._mutex = threading.Lock()
 
     def _event(self, evt):
-        tfields = itemgetter('uuid', 'hostname',
-                             'timestamp', 'local_received', 'clock')
+        tfields = itemgetter("uuid", "hostname", "timestamp", "local_received", "clock")
         get_task = self.tasks.__getitem__
         self.event_count += 1
-        group, _, subject = evt['type'].partition('-')
-        if group == 'task':
-            (uuid, hostname, timestamp,
-                local_received, clock) = tfields(evt)
-            is_client_event = subject == 'sent'
+        group, _, subject = evt["type"].partition("-")
+        if group == "task":
+            (uuid, hostname, timestamp, local_received, clock) = tfields(evt)
+            is_client_event = subject == "sent"
             try:
                 task, task_created = get_task(uuid), False
             except KeyError:
@@ -32,7 +30,7 @@ class CustomState:
             if is_client_event:
                 task.client = hostname
 
-            if subject == 'received':
+            if subject == "received":
                 self.task_count += 1
 
             task.event(subject, timestamp, local_received, evt)
@@ -47,20 +45,18 @@ class CustomState:
         runtime = None
         if state in READY_STATES:
             try:
-                name = self.tasks.pop(evt['uuid']).name or ''
+                name = self.tasks.pop(evt["uuid"]).name or ""
             except (KeyError, AttributeError):
-                name = ''
+                name = ""
             finally:
-                if 'runtime' in evt:
-                    runtime = evt['runtime']
+                if "runtime" in evt:
+                    runtime = evt["runtime"]
                 return (name, state, runtime)
         else:
             self._event(evt)
             try:
-                name = self.tasks[evt['uuid']].name or ''
+                name = self.tasks[evt["uuid"]].name or ""
             except (KeyError, AttributeError):
-                name = ''
+                name = ""
             finally:
                 return (name, state, runtime)
-
-
