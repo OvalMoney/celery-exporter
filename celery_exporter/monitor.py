@@ -33,13 +33,12 @@ class TaskThread(threading.Thread):
     def _process_event(self, evt):
         # Events might come in in parallel. Celery already has a lock
         # that deals with this exact situation so we'll use that for now.
-        with self._state._mutex:
-            if celery.events.group_from(evt['type']) == 'task':
-                evt_state = evt['type'][5:]
-                state = celery.events.state.TASK_EVENT_TO_STATE[evt_state]
-                if state == celery.states.STARTED:
-                    self._observe_latency(evt)
-                self._collect_tasks(evt, state)
+        if celery.events.group_from(evt['type']) == 'task':
+            evt_state = evt['type'][5:]
+            state = celery.events.state.TASK_EVENT_TO_STATE[evt_state]
+            if state == celery.states.STARTED:
+                self._observe_latency(evt)
+            self._collect_tasks(evt, state)
 
     def _observe_latency(self, evt):
         try:

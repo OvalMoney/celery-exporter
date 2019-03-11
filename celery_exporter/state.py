@@ -45,18 +45,19 @@ class CustomState:
         runtime = None
         if state in READY_STATES:
             try:
-                name = self.tasks.pop(evt["uuid"]).name or ""
-            except (KeyError, AttributeError):
+                with self._mutex:
+                    name = self.tasks.pop(evt["uuid"]).name or ""
+            except (KeyError, AttributeError): # pragma: no cover
                 name = ""
             finally:
                 if "runtime" in evt:
                     runtime = evt["runtime"]
                 return (name, state, runtime)
         else:
-            self._event(evt)
+            self.event(evt)
             try:
                 name = self.tasks[evt["uuid"]].name or ""
-            except (KeyError, AttributeError):
+            except (KeyError, AttributeError): # pragma: no cover
                 name = ""
             finally:
                 return (name, state, runtime)
