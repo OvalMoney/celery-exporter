@@ -9,6 +9,7 @@ import celery.states
 import celery.events
 
 from .metrics import TASKS, TASKS_RUNTIME, LATENCY, WORKERS
+from .state import CustomState
 
 class TaskThread(threading.Thread):
     """
@@ -20,7 +21,7 @@ class TaskThread(threading.Thread):
         self._app = app
         self._namespace = namespace
         self.log = logging.getLogger('task-thread')
-        self._state = self._app.events.State(max_tasks_in_memory=max_tasks_in_memory)
+        self._state = CustomState(max_tasks_in_memory=max_tasks_in_memory)
         self._known_states = set()
         self._known_states_names = set()
         self._tasks_started = dict()
