@@ -73,7 +73,7 @@ class TestMockedCelery(BaseTest):
             labels=dict(namespace=self.namespace)) == 0
         assert REGISTRY.get_sample_value('celery_tasks_latency_seconds_sum',
             labels=dict(namespace=self.namespace)) == 0
-        
+
         m._process_event(Event(
             'task-received', uuid=task_uuid,  name=self.task,
             args='()', kwargs='{}', retries=0, eta=None, hostname=hostname,

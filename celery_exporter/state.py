@@ -3,7 +3,7 @@ from operator import itemgetter
 
 from celery.states import READY_STATES
 from celery.utils.functional import LRUCache
-from celery.events.state import Task, Worker
+from celery.events.state import Task
 
 
 class CustomState:
