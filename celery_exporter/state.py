@@ -6,7 +6,7 @@ from celery.utils.functional import LRUCache
 from celery.events.state import Task
 
 
-class CustomState:
+class CeleryState:
     event_count = 0
     task_count = 0
 
