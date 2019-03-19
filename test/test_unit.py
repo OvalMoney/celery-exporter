@@ -92,6 +92,13 @@ class TestMockedCelery(BaseTest):
             runtime=runtime, hostname=hostname, clock=2,
             local_received=local_received + latency_before_started + runtime))
         self._assert_all_states({celery.states.RECEIVED, celery.states.STARTED, celery.states.SUCCESS})
+        
+        m._process_event(Event(
+            'task-sent', uuid=task_uuid,  name=self.task,
+            args='()', kwargs='{}', retries=0, eta=None, hostname=hostname,
+            clock=0,
+            local_received=local_received))
+        self._assert_task_states({celery.states.PENDING}, 1)
 
         assert REGISTRY.get_sample_value('celery_tasks_latency_seconds_count',
             labels=dict(namespace=self.namespace)) == 1

@@ -9,6 +9,7 @@ import celery.states
 import celery.events
 
 from .metrics import TASKS, TASKS_RUNTIME, LATENCY, WORKERS
+from .state import CeleryState
 
 class TaskThread(threading.Thread):
     """
@@ -20,7 +21,7 @@ class TaskThread(threading.Thread):
         self._app = app
         self._namespace = namespace
         self.log = logging.getLogger('task-thread')
-        self._state = self._app.events.State(max_tasks_in_memory=max_tasks_in_memory)
+        self._state = CeleryState(max_tasks_in_memory=max_tasks_in_memory)
         self._known_states = set()
         self._known_states_names = set()
         self._tasks_started = dict()
@@ -32,13 +33,12 @@ class TaskThread(threading.Thread):
     def _process_event(self, evt):
         # Events might come in in parallel. Celery already has a lock
         # that deals with this exact situation so we'll use that for now.
-        with self._state._mutex:
-            if celery.events.group_from(evt['type']) == 'task':
-                evt_state = evt['type'][5:]
-                state = celery.events.state.TASK_EVENT_TO_STATE[evt_state]
-                if state == celery.states.STARTED:
-                    self._observe_latency(evt)
-                self._collect_tasks(evt, state)
+        if celery.events.group_from(evt['type']) == 'task':
+            evt_state = evt['type'][5:]
+            state = celery.events.state.TASK_EVENT_TO_STATE[evt_state]
+            if state == celery.states.STARTED:
+                self._observe_latency(evt)
+            self._collect_tasks(evt, state)
 
     def _observe_latency(self, evt):
         try:
@@ -54,31 +54,12 @@ class TaskThread(threading.Thread):
                     evt['local_received'] - prev_evt.local_received)
 
     def _collect_tasks(self, evt, state):
-        if state in celery.states.READY_STATES:
-            self._incr_ready_task(evt, state)
-        else:
-            self._incr_unready_task(evt, state)
+        (name, state, runtime) = self._state.collect(evt, state)
+        if runtime is not None:
+            TASKS_RUNTIME.labels(namespace=self._namespace, name=name).observe(runtime)
 
-    def _incr_ready_task(self, evt, state):
-        try:
-            # remove event from list of in-progress tasks
-            name = self._state.tasks.pop(evt['uuid']).name or ''
-        except (KeyError, AttributeError):  # pragma: no cover
-            name = ''
-        finally:
-            TASKS.labels(namespace=self._namespace, name=name, state=state).inc()
-            if 'runtime' in evt:
-                TASKS_RUNTIME.labels(namespace=self._namespace, name=name) \
-                             .observe(evt['runtime'])
+        TASKS.labels(namespace=self._namespace, name=name, state=state).inc()
 
-    def _incr_unready_task(self, evt, state):
-        self._state._event(evt)
-        try:
-            name = self._state.tasks[evt['uuid']].name or ''
-        except (KeyError, AttributeError):  # pragma: no cover
-            name = ''
-        finally:
-            TASKS.labels(namespace=self._namespace, name=name, state=state).inc()
 
     def _monitor(self):  # pragma: no cover
         while True:
