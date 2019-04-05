@@ -22,8 +22,16 @@ from celery_test_utils import BaseTest, get_celery_app
 class TestMockedCelery(BaseTest):
     def setUp(self):
         self.app = get_celery_app()
-        with patch("celery.task.control.inspect.registered_tasks") as tasks:
-            tasks.return_value = {"worker1": [self.task]}
+        with patch("celery.task.control.inspect.conf") as tasks:
+            tasks.return_value = {
+                "celery@d6f95e9e24fc": {
+                    "task_routes": {
+                        "my_task": {},
+                        "my_task_b": {"queue": "queue_b"},
+                        "my_task_c": {"queue": "queue_c"},
+                    }
+                }
+            }
             setup_metrics(self.app, self.namespace)  # reset metrics
 
     def test_initial_metric_values(self):
@@ -184,6 +192,7 @@ class TestMockedCelery(BaseTest):
                 "task-sent",
                 uuid=task_uuid,
                 name=self.task,
+                queue=self.queue,
                 args="()",
                 kwargs="{}",
                 retries=0,
@@ -249,8 +258,9 @@ class TestMockedCelery(BaseTest):
     def _assert_task_states(self, states, cnt):
         for state in states:
             task_by_name_label = dict(
-                namespace=self.namespace, name=self.task, state=state
+                namespace=self.namespace, name=self.task, state=state, queue=self.queue
             )
+
             assert (
                 REGISTRY.get_sample_value(
                     "celery_tasks_total", labels=task_by_name_label

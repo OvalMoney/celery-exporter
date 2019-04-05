@@ -5,6 +5,7 @@ from unittest import TestCase
 class BaseTest(TestCase):
     task = "my_task"
     namespace = "celery"
+    queue = "celery"
     max_tasks = 10000
 
 

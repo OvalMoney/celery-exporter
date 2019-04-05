@@ -5,6 +5,8 @@ from celery.states import READY_STATES, RECEIVED
 from celery.utils.functional import LRUCache
 from celery.events.state import Task, TASK_EVENT_TO_STATE
 
+CELERY_DEFAULT_QUEUE = "celery"
+
 
 class CeleryState:
     event_count = 0
@@ -14,6 +16,19 @@ class CeleryState:
         self.tasks = LRUCache(max_tasks_in_memory)
         self.queue_by_task = {}
         self._mutex = threading.Lock()
+
+    @classmethod
+    def get_configs(self, app):
+        configs = dict()
+        conf = app.control.inspect().conf()
+        if not conf:  # pragma: no cover
+            return None
+        for k, config in conf.items():
+            configs[k] = {
+                "routes_by_task": config["task_routes"],
+                "default_queue": config.get("task_default_queue", CELERY_DEFAULT_QUEUE),
+            }
+        return configs
 
     def _measure_latency(self, evt):
         try:
@@ -56,7 +71,7 @@ class CeleryState:
         name = task.name
         if name is not None and "queue" in evt:
             if not name in self.queue_by_task:
-                self.queue_by_task[name] = evt["queue"]
+                self.queue_by_task[name] = evt.get("queue", CELERY_DEFAULT_QUEUE)
 
         return (task, task_created), subject
 

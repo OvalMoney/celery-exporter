@@ -8,7 +8,7 @@ import celery
 import celery.states
 
 from .metrics import TASKS, TASKS_RUNTIME, LATENCY, WORKERS
-from .state import CeleryState
+from .state import CeleryState, CELERY_DEFAULT_QUEUE
 
 
 class TaskThread(threading.Thread):
@@ -36,7 +36,7 @@ class TaskThread(threading.Thread):
             LATENCY.labels(namespace=self._namespace).observe(latency)
         (name, state, runtime) = self._state.collect(evt)
         if name is not None:
-            queue = self._state.queue_by_task[name]
+            queue = self._state.queue_by_task.get(name, CELERY_DEFAULT_QUEUE)
             if runtime is not None:
                 TASKS_RUNTIME.labels(namespace=self._namespace, name=name).observe(
                     runtime
@@ -113,15 +113,9 @@ def setup_metrics(app, namespace):
     """
     WORKERS.labels(namespace=namespace)
     LATENCY.labels(namespace=namespace)
-    try:
-        configs = dict()
-        conf = app.control.inspect().conf()
-        for k, config in conf.items():
-            configs[k] = {
-                "routes_by_task": config["task_routes"],
-                "default_queue": config.get("task_default_queue", "celery"),
-            }
-    except Exception:  # pragma: no cover
+    configs = CeleryState.get_configs(app)
+
+    if not configs:  # pragma: no cover
         for metric in TASKS.collect():
             for name, labels, cnt in metric.samples:
                 TASKS.labels(**labels)
