@@ -237,14 +237,14 @@ class TestMockedCelery(BaseTest):
         assert (
             REGISTRY.get_sample_value(
                 "celery_tasks_runtime_seconds_count",
-                labels=dict(namespace=self.namespace, name=self.task),
+                labels=dict(namespace=self.namespace, name=self.task, queue=self.queue),
             )
             == 1
         )
         assert (
             REGISTRY.get_sample_value(
                 "celery_tasks_runtime_seconds_sum",
-                labels=dict(namespace=self.namespace, name=self.task),
+                labels=dict(namespace=self.namespace, name=self.task, queue=self.queue),
             )
             == 234.5
         )

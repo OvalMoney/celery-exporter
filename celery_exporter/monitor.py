@@ -38,9 +38,9 @@ class TaskThread(threading.Thread):
         if name is not None:
             queue = self._state.queue_by_task.get(name, CELERY_DEFAULT_QUEUE)
             if runtime is not None:
-                TASKS_RUNTIME.labels(namespace=self._namespace, name=name).observe(
-                    runtime
-                )
+                TASKS_RUNTIME.labels(
+                    namespace=self._namespace, name=name, queue=queue
+                ).observe(runtime)
 
             TASKS.labels(
                 namespace=self._namespace, name=name, state=state, queue=queue
