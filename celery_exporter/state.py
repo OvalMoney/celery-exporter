@@ -12,6 +12,7 @@ class CeleryState:
 
     def __init__(self, max_tasks_in_memory=10000):
         self.tasks = LRUCache(max_tasks_in_memory)
+        self.queue_by_task = {}
         self._mutex = threading.Lock()
 
     def _measure_latency(self, evt):
@@ -51,6 +52,11 @@ class CeleryState:
             self.task_count += 1
 
         task.event(subject, timestamp, local_received, evt)
+
+        name = task.name
+        if name is not None and "queue" in evt:
+            if not name in self.queue_by_task:
+                self.queue_by_task[name] = evt["queue"]
 
         return (task, task_created), subject
 

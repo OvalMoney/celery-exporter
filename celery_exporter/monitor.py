@@ -36,12 +36,15 @@ class TaskThread(threading.Thread):
             LATENCY.labels(namespace=self._namespace).observe(latency)
         (name, state, runtime) = self._state.collect(evt)
         if name is not None:
+            queue = self._state.queue_by_task[name]
             if runtime is not None:
                 TASKS_RUNTIME.labels(namespace=self._namespace, name=name).observe(
                     runtime
                 )
 
-            TASKS.labels(namespace=self._namespace, name=name, state=state).inc()
+            TASKS.labels(
+                namespace=self._namespace, name=name, state=state, queue=queue
+            ).inc()
 
     def _monitor(self):  # pragma: no cover
         while True:
@@ -111,12 +114,21 @@ def setup_metrics(app, namespace):
     WORKERS.labels(namespace=namespace)
     LATENCY.labels(namespace=namespace)
     try:
-        registered_tasks = app.control.inspect().registered_tasks().values()
+        configs = dict()
+        conf = app.control.inspect().conf()
+        for k, config in conf.items():
+            configs[k] = {
+                "routes_by_task": config["task_routes"],
+                "default_queue": config.get("task_default_queue", "celery"),
+            }
     except Exception:  # pragma: no cover
         for metric in TASKS.collect():
             for name, labels, cnt in metric.samples:
                 TASKS.labels(**labels)
     else:
         for state in celery.states.ALL_STATES:
-            for task_name in set(chain.from_iterable(registered_tasks)):
-                TASKS.labels(namespace=namespace, name=task_name, state=state)
+            for _, task in configs.items():
+                routes = task["routes_by_task"]
+                for k, v in routes.items():
+                    queue = v.get("queue", task["default_queue"])
+                    TASKS.labels(namespace=namespace, name=k, state=state, queue=queue)
