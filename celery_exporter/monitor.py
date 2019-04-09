@@ -8,7 +8,7 @@ import celery
 import celery.states
 
 from .metrics import TASKS, TASKS_RUNTIME, LATENCY, WORKERS
-from .state import CeleryState, CELERY_DEFAULT_QUEUE
+from .state import CeleryState
 
 
 class TaskThread(threading.Thread):
@@ -34,9 +34,8 @@ class TaskThread(threading.Thread):
         latency = self._state.latency(evt)
         if latency is not None:
             LATENCY.labels(namespace=self._namespace).observe(latency)
-        (name, state, runtime) = self._state.collect(evt)
+        (name, state, runtime, queue) = self._state.collect(evt)
         if name is not None:
-            queue = self._state.queue_by_task.get(name, CELERY_DEFAULT_QUEUE)
             if runtime is not None:
                 TASKS_RUNTIME.labels(
                     namespace=self._namespace, name=name, queue=queue

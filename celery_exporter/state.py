@@ -6,6 +6,7 @@ from celery.utils.functional import LRUCache
 from celery.events.state import Task, TASK_EVENT_TO_STATE
 
 CELERY_DEFAULT_QUEUE = "celery"
+CELERY_MISSING_DATA = "undefined"
 
 
 class CeleryState:
@@ -14,7 +15,7 @@ class CeleryState:
 
     def __init__(self, max_tasks_in_memory=10000):
         self.tasks = LRUCache(max_tasks_in_memory)
-        self.queue_by_task = {}
+        self._queue_by_task = {}
         self._mutex = threading.Lock()
 
     @classmethod
@@ -70,8 +71,8 @@ class CeleryState:
 
         name = task.name
         if name is not None and "queue" in evt:
-            if not name in self.queue_by_task:
-                self.queue_by_task[name] = evt.get("queue", CELERY_DEFAULT_QUEUE)
+            if not name in self._queue_by_task:
+                self._queue_by_task[name] = evt["queue"]
 
         return (task, task_created), subject
 
@@ -89,17 +90,19 @@ class CeleryState:
                     with self._mutex:
                         name = self.tasks.pop(evt["uuid"]).name or ""
                 except (KeyError, AttributeError):  # pragma: no cover
-                    name = ""
+                    name = CELERY_MISSING_DATA
                 finally:
+                    queue = self._queue_by_task.get(name, CELERY_MISSING_DATA)
                     if "runtime" in evt:
                         runtime = evt["runtime"]
-                    return (name, state, runtime)
+                    return (name, state, runtime, queue)
             else:
                 self.event(evt, subject)
                 try:
-                    name = self.tasks[evt["uuid"]].name or ""
+                    name = self.tasks[evt["uuid"]].name or CELERY_MISSING_DATA
                 except (KeyError, AttributeError):  # pragma: no cover
-                    name = ""
+                    name = CELERY_MISSING_DATA
                 finally:
-                    return (name, state, runtime)
-        return (None, None, None)
+                    queue = self._queue_by_task.get(name, CELERY_MISSING_DATA)
+                    return (name, state, runtime, queue)
+        return (None, None, None, None)
