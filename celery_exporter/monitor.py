@@ -112,16 +112,13 @@ def setup_metrics(app, namespace):
     """
     WORKERS.labels(namespace=namespace)
     LATENCY.labels(namespace=namespace)
-    configs = CeleryState.get_configs(app)
+    config = CeleryState.get_config(app)
 
-    if not configs:  # pragma: no cover
+    if not config:  # pragma: no cover
         for metric in TASKS.collect():
             for name, labels, cnt in metric.samples:
                 TASKS.labels(**labels)
     else:
         for state in celery.states.ALL_STATES:
-            for _, task in configs.items():
-                routes = task["routes_by_task"]
-                for k, v in routes.items():
-                    queue = v.get("queue", task["default_queue"])
-                    TASKS.labels(namespace=namespace, name=k, state=state, queue=queue)
+            for task, queue in config.items():
+                TASKS.labels(namespace=namespace, name=task, state=state, queue=queue)

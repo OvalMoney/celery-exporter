@@ -1,5 +1,6 @@
 import threading
 from operator import itemgetter
+from itertools import chain
 
 from celery.states import READY_STATES, RECEIVED
 from celery.utils.functional import LRUCache
@@ -19,17 +20,26 @@ class CeleryState:
         self._mutex = threading.Lock()
 
     @classmethod
-    def get_configs(self, app):
-        configs = dict()
-        conf = app.control.inspect().conf()
-        if not conf:  # pragma: no cover
-            return None
-        for k, config in conf.items():
-            configs[k] = {
-                "routes_by_task": config["task_routes"],
-                "default_queue": config.get("task_default_queue", CELERY_DEFAULT_QUEUE),
-            }
-        return configs
+    def get_config(self, app):
+        res = dict()
+        try:
+            registered_tasks = app.control.inspect().registered_tasks().values()
+            confs = app.control.inspect().conf()
+        except Exception:  # pragma: no cover
+            return res
+
+        for task_name in set(chain.from_iterable(registered_tasks)):
+            for conf in confs.values():
+                default = conf.get("task_default_queue", CELERY_DEFAULT_QUEUE)
+                if task_name in res and res[task_name] != default:
+                    continue
+
+                try:
+                    routes = conf["task_routes"]
+                    res[task_name] = routes[task_name]["queue"]
+                except KeyError:
+                    res[task_name] = default
+        return res
 
     def _measure_latency(self, evt):
         try:
