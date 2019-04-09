@@ -8,7 +8,7 @@ from celery.utils import uuid
 from prometheus_client import REGISTRY
 from unittest import TestCase
 from unittest.mock import patch
-import pytest
+
 from celery_exporter.monitor import (
     WorkerMonitoringThread,
     TaskThread,
