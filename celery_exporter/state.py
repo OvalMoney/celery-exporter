@@ -88,8 +88,8 @@ class CeleryState:
             if state in READY_STATES:
                 try:
                     with self._mutex:
-                        name = self.tasks.pop(evt["uuid"]).name or ""
-                except (KeyError, AttributeError):  # pragma: no cover
+                        name = self.tasks.pop(evt["uuid"]).name or CELERY_MISSING_DATA
+                except (KeyError):  # pragma: no cover
                     name = CELERY_MISSING_DATA
                 finally:
                     queue = self._queue_by_task.get(name, CELERY_MISSING_DATA)
@@ -100,7 +100,7 @@ class CeleryState:
                 self.event(evt, subject)
                 try:
                     name = self.tasks[evt["uuid"]].name or CELERY_MISSING_DATA
-                except (KeyError, AttributeError):  # pragma: no cover
+                except (KeyError):  # pragma: no cover
                     name = CELERY_MISSING_DATA
                 finally:
                     queue = self._queue_by_task.get(name, CELERY_MISSING_DATA)
