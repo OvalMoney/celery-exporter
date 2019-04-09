@@ -8,7 +8,7 @@ from celery.utils import uuid
 from prometheus_client import REGISTRY
 from unittest import TestCase
 from unittest.mock import patch
-
+import pytest
 from celery_exporter.monitor import (
     WorkerMonitoringThread,
     TaskThread,
@@ -25,16 +25,17 @@ class TestMockedCelery(BaseTest):
     def setUp(self):
         self.app = get_celery_app()
         with patch("celery.task.control.inspect.conf") as tasks:
-            tasks.return_value = {
-                "celery@d6f95e9e24fc": {
-                    "task_routes": {
-                        "my_task": {},
-                        "my_task_b": {"queue": "queue_b"},
-                        "my_task_c": {"queue": "queue_c"},
-                    }
+            with patch("celery.task.control.inspect.registered_tasks") as registered:
+                tasks.return_value = {
+                    "celery@d6f95e9e24fc": {
+                        "task_routes": {"my_task": {}, "trial": {"queue": "deadbeef"}}
+                    },
+                    "celery@adsqas78e891": {
+                        "task_routes": {"my_task": {}, "trial": {"queue": "deadbeef"}}
+                    },
                 }
-            }
-            setup_metrics(self.app, self.namespace)  # reset metrics
+                registered.return_value = {"celery@d6f95e9e24fc": [self.task, "trial"]}
+                setup_metrics(self.app, self.namespace)  # reset metrics
 
     def test_initial_metric_values(self):
         self._assert_task_states(celery.states.ALL_STATES, 0)
