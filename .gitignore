@@ -10,5 +10,6 @@ __pycache__
 .cache/
 .python-version
 .pytest_cache
+htmlcov/
 
 .vscode
