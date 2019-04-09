@@ -11,7 +11,7 @@ setup(
     description="Prometheus metrics exporter for Celery",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    version="1.2.1",
+    version="1.2.2",
     author="Fabio Todaro",
     license="MIT",
     author_email="fbregist@gmail.com",
