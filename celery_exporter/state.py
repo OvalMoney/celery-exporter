@@ -51,7 +51,7 @@ class CeleryState:
                         if i in routes and "queue" in routes[i]:
                             res[task_name] = routes[i]["queue"]
                             break
-                else:  # pragma: no cover
+                else:  
                     res[task_name] = default
         return res
 
