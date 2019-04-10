@@ -20,6 +20,15 @@ class CeleryState:
         self._mutex = threading.Lock()
 
     @classmethod
+    def _gen_wildcards(self, name):
+        chunked = name.split(".")
+        res = [name]
+        for elem in reversed(chunked):
+            chunked.pop()
+            res.append(".".join(chunked + ["*"]))
+        return res
+
+    @classmethod
     def get_config(self, app):
         res = dict()
         try:
@@ -32,12 +41,17 @@ class CeleryState:
             for conf in confs.values():
                 default = conf.get("task_default_queue", CELERY_DEFAULT_QUEUE)
                 if task_name in res and res[task_name] != default:
-                    continue
+                    break
 
-                try:
+                task_wildcard_names = self._gen_wildcards(task_name)
+                if "task_routes" in conf:
                     routes = conf["task_routes"]
-                    res[task_name] = routes[task_name]["queue"]
-                except KeyError:
+                    res[task_name] = default
+                    for i in task_wildcard_names:
+                        if i in routes and "queue" in routes[i]:
+                            res[task_name] = routes[i]["queue"]
+                            break
+                else:  # pragma: no cover
                     res[task_name] = default
         return res
 
