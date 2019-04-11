@@ -88,7 +88,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum( rate(celery_tasks_total{instance=~\"^$Instance$\",name=~\"^$Name$\",state=~\"^$State$\"}[$Interval])  ) by (state)",
+          "expr": "sum( rate(celery_tasks_total{namespace=~\"^$Namespace$\",name=~\"^$Name$\",state=~\"^$State$\"}[$Interval])  ) by (state)",
           "format": "time_series",
           "instant": false,
           "interval": "",
@@ -181,7 +181,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum( rate( celery_tasks_total{instance=~\"^$Instance$\",name=~\"^$Name$\",state=~\"^$State$\"}[$Interval] ) ) by (name,state)",
+          "expr": "sum( rate( celery_tasks_total{namespace=~\"^$Namespace$\",name=~\"^$Name$\",state=~\"^$State$\"}[$Interval] ) ) by (name,state)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -261,7 +261,7 @@
       "links": [],
       "targets": [
         {
-          "expr": "sum ( rate( celery_tasks_runtime_seconds_bucket{instance=~\"^$Instance$\",name=~\"^$Name$\"}[$Interval] ) ) by (le)",
+          "expr": "sum ( rate( celery_tasks_runtime_seconds_bucket{namespace=~\"^$Namespace$\",name=~\"^$Name$\"}[$Interval] ) ) by (le)",
           "format": "heatmap",
           "hide": false,
           "instant": false,
@@ -324,7 +324,7 @@
       "links": [],
       "targets": [
         {
-          "expr": "sum ( rate( celery_tasks_latency_seconds_bucket{instance=~\"^$Instance$\",name=~\"^$Name$\"}[$Interval] ) ) by (le)",
+          "expr": "sum ( rate( celery_tasks_latency_seconds_bucket{namespace=~\"^$Namespace$\",name=~\"^$Name$\"}[$Interval] ) ) by (le)",
           "format": "heatmap",
           "interval": "15s",
           "intervalFactor": 1,
@@ -416,7 +416,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(avg_over_time(celery_workers{instance=~\"^$Instance$\"}[$Interval]))",
+          "expr": "sum(avg_over_time(celery_workers{namespace=~\"^$Namespace$\"}[$Interval]))",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -496,7 +496,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "topk(15, sum( irate( celery_tasks_total{instance=~\"^$Instance$\",name=~\"^$Name$\",state=~\"$State\"}[1m] ) ) by (name))",
+              "expr": "topk(15, sum( irate( celery_tasks_total{namespace=~\"^$Namespace$\",name=~\"^$Name$\",state=~\"$State\"}[1m] ) ) by (name))",
               "format": "time_series",
               "interval": "$Interval",
               "intervalFactor": 1,
@@ -569,14 +569,14 @@
           "value": "$__all"
         },
         "datasource": "Prometheus",
-        "definition": "label_values(celery_tasks_total,instance)",
+        "definition": "label_values(celery_tasks_total,namespace)",
         "hide": 0,
         "includeAll": false,
         "label": null,
         "multi": false,
-        "name": "Instance",
+        "name": "Namespace",
         "options": [],
-        "query": "label_values(celery_tasks_total,instance)",
+        "query": "label_values(celery_tasks_total,namespace)",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
