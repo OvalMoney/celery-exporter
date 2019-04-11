@@ -33,8 +33,7 @@ class TestMockedCelery(BaseTest):
                     "celery@adsqas78e891": {
                         "task_routes": {"my_task": {}, "trial": {"queue": "deadbeef"}}
                     },
-                    "celery@12311847jsa2": {
-                    },
+                    "celery@12311847jsa2": {},
                 }
                 registered.return_value = {"celery@d6f95e9e24fc": [self.task, "trial"]}
                 setup_metrics(self.app, self.namespace)  # reset metrics
