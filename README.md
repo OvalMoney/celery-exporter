@@ -8,9 +8,9 @@ Celery Exporter is a Prometheus metrics exporter for Celery 4, written in python
 Here the list of exposed metrics:
 
 * `celery_tasks_total` exposes the number of tasks currently known to the queue
-  labeled by `name`, `state` and `namespace`.
+  labeled by `name`, `state`, `queue` and `namespace`.
 * `celery_tasks_runtime_seconds` tracks the number of seconds tasks take
-  until completed as histogram labeled by `name` and `namespace`
+  until completed as histogram labeled by `name`, `queue` and `namespace`
 * `celery_tasks_latency_seconds` exposes a histogram of task latency, i.e. the time until
   tasks are picked up by a worker
 * `celery_workers` exposes the number of currently probably alive workers

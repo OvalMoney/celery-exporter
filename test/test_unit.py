@@ -16,7 +16,7 @@ from celery_exporter.monitor import (
     setup_metrics,
 )
 
-from celery_exporter.state import CELERY_MISSING_DATA
+from celery_exporter.state import CELERY_MISSING_DATA, CeleryState
 
 from celery_test_utils import BaseTest, get_celery_app
 
@@ -33,6 +33,7 @@ class TestMockedCelery(BaseTest):
                     "celery@adsqas78e891": {
                         "task_routes": {"my_task": {}, "trial": {"queue": "deadbeef"}}
                     },
+                    "celery@12311847jsa2": {},
                 }
                 registered.return_value = {"celery@d6f95e9e24fc": [self.task, "trial"]}
                 setup_metrics(self.app, self.namespace)  # reset metrics
@@ -289,6 +290,22 @@ class TestMockedCelery(BaseTest):
             e = EnableEventsThread(app=self.app)
             e.enable_events()
             mock_enable_events.assert_called_once_with()
+
+    def test_gen_wildcards(self):
+        strings = {
+            "aaa.bbb.ccc.ddd": [
+                "aaa.bbb.ccc.ddd",
+                "aaa.bbb.ccc.*",
+                "aaa.bbb.*",
+                "aaa.*",
+                "*",
+            ],
+            "aaa.bbb": ["aaa.bbb", "aaa.*", "*"],
+            "aaa": ["aaa", "*"],
+        }
+        for case, expectation in strings.items():
+            result = CeleryState._gen_wildcards(case)
+            assert result == expectation
 
     def _assert_task_states(self, states, cnt):
         for state in states:
