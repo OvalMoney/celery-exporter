@@ -1,4 +1,40 @@
 {
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "__requires": [
+    {
+      "type": "panel",
+      "id": "graph",
+      "name": "Graph",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "heatmap",
+      "name": "Heatmap",
+      "version": ""
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "singlestat",
+      "name": "Singlestat",
+      "version": ""
+    }
+  ],
   "annotations": {
     "list": [
       {
@@ -15,7 +51,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1554892546280,
+  "id": null,
+  "iteration": 1554977181871,
   "links": [],
   "panels": [
     {
@@ -36,7 +73,7 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "Prometheus",
+      "datasource": "${DS_PROMETHEUS}",
       "decimals": 5,
       "fill": 1,
       "gridPos": {
@@ -253,12 +290,14 @@
         "y": 17
       },
       "heatmap": {},
+      "hideZeroBuckets": false,
       "highlightCards": true,
       "id": 4,
       "legend": {
         "show": true
       },
       "links": [],
+      "reverseYBuckets": false,
       "targets": [
         {
           "expr": "sum ( rate( celery_tasks_runtime_seconds_bucket{namespace=~\"^$Namespace$\",name=~\"^$Name$\"}[$Interval] ) ) by (le)",
@@ -316,12 +355,14 @@
         "y": 26
       },
       "heatmap": {},
+      "hideZeroBuckets": false,
       "highlightCards": true,
       "id": 36,
       "legend": {
         "show": false
       },
       "links": [],
+      "reverseYBuckets": false,
       "targets": [
         {
           "expr": "sum ( rate( celery_tasks_latency_seconds_bucket{namespace=~\"^$Namespace$\",name=~\"^$Name$\"}[$Interval] ) ) by (le)",
@@ -475,7 +516,7 @@
           "lines": true,
           "linewidth": 1,
           "links": [],
-          "minSpan": 5,
+          "maxPerRow": 4,
           "nullPointMode": "null as zero",
           "percentage": false,
           "pointradius": 5,
@@ -552,7 +593,7 @@
     }
   ],
   "refresh": false,
-  "schemaVersion": 16,
+  "schemaVersion": 18,
   "style": "dark",
   "tags": [
     "prometheus",
@@ -562,13 +603,8 @@
     "list": [
       {
         "allValue": null,
-        "current": {
-          "selected": true,
-          "tags": [],
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "Prometheus",
+        "current": {},
+        "datasource": "${DS_PROMETHEUS}",
         "definition": "label_values(celery_tasks_total,namespace)",
         "hide": 0,
         "includeAll": false,
@@ -589,13 +625,8 @@
       },
       {
         "allValue": ".*",
-        "current": {
-          "text": "All",
-          "value": [
-            "$__all"
-          ]
-        },
-        "datasource": "Prometheus",
+        "current": {},
+        "datasource": "${DS_PROMETHEUS}",
         "definition": "label_values(celery_tasks_total,name)",
         "hide": 0,
         "includeAll": true,
@@ -618,12 +649,8 @@
       },
       {
         "allValue": ".*",
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": "$__all"
-        },
-        "datasource": "Prometheus",
+        "current": {},
+        "datasource": "${DS_PROMETHEUS}",
         "definition": "label_values(celery_tasks_total,state)",
         "hide": 0,
         "includeAll": true,
@@ -728,6 +755,6 @@
   },
   "timezone": "",
   "title": "Celery Monitoring",
-  "uid": "",
+  "uid": "wHQ6LNgZz",
   "version": 1
 }
