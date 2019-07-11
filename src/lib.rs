@@ -1,13 +1,13 @@
-use std::fmt;
-use std::collections::HashMap;
 use lru::LruCache;
+use std::collections::HashMap;
+use std::fmt;
 
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 
 static CELERY_MISSING_DATA: &'static str = "undefined";
 
-type CollectOutcome = (Option<String>,Option<String>,Option<f64>, Option<String>);// name, state, runtime, queue
+type CollectOutcome = (Option<String>, Option<String>, Option<f64>, Option<String>); // name, state, runtime, queue
 
 #[derive(Clone)]
 struct Task {
@@ -15,7 +15,7 @@ struct Task {
     name: String,
     local_received: f64,
     runtime: Option<f64>,
-    state: TaskState
+    state: TaskState,
 }
 
 impl Default for Task {
@@ -25,22 +25,32 @@ impl Default for Task {
             name: CELERY_MISSING_DATA.to_string(),
             local_received: 0.0,
             runtime: None,
-            state: TaskState::UNDEFINED
+            state: TaskState::UNDEFINED,
         }
     }
 }
 
 impl Task {
-    fn update_from_event(&mut self, evt: &PyDict) -> PyResult<()> { 
-        let kind: String = evt.get_item("type").expect("Invalid Event: missing type").extract()?; // GUARANTEED
+    fn update_from_event(&mut self, evt: &PyDict) -> PyResult<()> {
+        let kind: String = evt
+            .get_item("type")
+            .expect("Invalid Event: missing type")
+            .extract()?; // GUARANTEED
         let splitted = kind.split("-");
-        let state = splitted.collect::<Vec<&str>>()[1]; 
-        let uuid: String = evt.get_item("uuid").expect("Invalid Event: missing uuid").extract()?;// GUARANTEED
+        let state = splitted.collect::<Vec<&str>>()[1];
+        let uuid: String = evt
+            .get_item("uuid")
+            .expect("Invalid Event: missing uuid")
+            .extract()?; // GUARANTEED
         let name = evt.get_item("name");
-        
-        if kind.contains("task")  {
+
+        if kind.contains("task") {
+            self.uuid = uuid.clone();
             self.state = event_to_state(state);
-            self.local_received = evt.get_item("local_received").expect("Invalid Event: missing local_received").extract()?; 
+            self.local_received = evt
+                .get_item("local_received")
+                .expect("Invalid Event: missing local_received")
+                .extract()?;
             match name {
                 Some(n) => self.name = n.extract()?,
                 None => {}
@@ -48,13 +58,12 @@ impl Task {
             if let Some(r) = evt.get_item("runtime") {
                 self.runtime = Some(r.extract()?);
             }
-
         }
         Ok(())
     }
 }
 
-#[derive(Debug,Copy,Clone)]
+#[derive(Debug, Copy, Clone)]
 enum TaskState {
     PENDING,
     RECEIVED,
@@ -64,7 +73,7 @@ enum TaskState {
     SUCCESS,
     REVOKED,
     REJECTED,
-    UNDEFINED
+    UNDEFINED,
 }
 impl fmt::Display for TaskState {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -82,7 +91,7 @@ fn event_to_state(evt_kind: &str) -> TaskState {
         "succeeded" => TaskState::SUCCESS,
         "revoked" => TaskState::REVOKED,
         "rejected" => TaskState::REJECTED,
-        _ => TaskState::UNDEFINED
+        _ => TaskState::UNDEFINED,
     }
 }
 
@@ -90,20 +99,19 @@ fn event_to_state(evt_kind: &str) -> TaskState {
 struct CeleryState {
     event_count: i32,
     task_count: i32,
-    queue_by_task: HashMap<String,String>,
-    tasks: LruCache<String, Task>
+    queue_by_task: HashMap<String, String>,
+    tasks: LruCache<String, Task>,
 }
 
 #[pymethods]
 impl CeleryState {
-
     #[new]
     fn new(obj: &PyRawObject, max_tasks_in_memory: usize) {
         obj.init(CeleryState {
             event_count: 0,
             task_count: 0,
             queue_by_task: HashMap::new(),
-            tasks: LruCache::new(max_tasks_in_memory)
+            tasks: LruCache::new(max_tasks_in_memory),
         });
     }
 
@@ -111,29 +119,41 @@ impl CeleryState {
         let mut task = Task::default();
         task.update_from_event(evt)?;
 
-
         match task.state {
             TaskState::SUCCESS | TaskState::FAILURE | TaskState::REVOKED => {
                 let name: String = self.tasks.pop(&task.uuid).unwrap_or(task.clone()).name;
-                let queue: String = self.queue_by_task.get(&name).unwrap_or(&CELERY_MISSING_DATA.to_string()).into();
+                let queue: String = self
+                    .queue_by_task
+                    .get(&name)
+                    .unwrap_or(&CELERY_MISSING_DATA.to_string())
+                    .into();
 
-                return Ok((Some(name),Some(task.state.to_string()), task.runtime, Some(queue)))
+                return Ok((
+                    Some(name),
+                    Some(task.state.to_string()),
+                    task.runtime,
+                    Some(queue),
+                ));
             }
             _ => {
                 self.event(&task);
-               
+
                 let task_mut = self.tasks.get_mut(&task.uuid).unwrap();
-                task_mut.state = task.state; 
+                task_mut.state = task.state;
                 let name: String = task_mut.name.clone();
                 match evt.get_item("queue") {
                     Some(q) => {
-                        self.queue_by_task.insert(name.to_string(),q.extract()?);
-                    },
+                        self.queue_by_task.insert(name.to_string(), q.extract()?);
+                    }
                     None => {}
                 }
 
-                let queue: String = self.queue_by_task.get(&name).unwrap_or(&CELERY_MISSING_DATA.to_string()).into();
-                return Ok((Some(name), Some(task.state.to_string()), None, Some(queue)))
+                let queue: String = self
+                    .queue_by_task
+                    .get(&name)
+                    .unwrap_or(&CELERY_MISSING_DATA.to_string())
+                    .into();
+                return Ok((Some(name), Some(task.state.to_string()), None, Some(queue)));
             }
         }
     }
@@ -145,46 +165,39 @@ impl CeleryState {
             TaskState::STARTED => {
                 let prev_evt = self.tasks.get(&task.uuid);
                 match prev_evt {
-                    Some(p) => {
-                        match p.state {
-                            TaskState::RECEIVED => {
-                                return Ok(Some(task.local_received - p.local_received))
-                            }
-                            _ => {}
+                    Some(p) => match p.state {
+                        TaskState::RECEIVED => {
+                            return Ok(Some(task.local_received - p.local_received))
                         }
-                    }
+                        _ => {}
+                    },
                     None => {}
                 }
             }
             _ => {}
         }
-        return Ok(None)
+        return Ok(None);
     }
-
 }
 
 impl CeleryState {
-    fn event(&mut self, task: &Task) -> PyResult<()> {
+    fn event(&mut self, task: &Task) {
         self.event_count += 1;
-      
-        let task_created: bool;
-        if let Some(t) = self.tasks.get(&task.uuid) {
-            task_created = false;
-        } else {
-            task_created = true;
-            self.tasks.put(task.uuid.to_string(), task.clone());
+
+        match self.tasks.get(&task.uuid) {
+            None => self.tasks.put(task.uuid.to_string(), task.clone()),
+            _ => {}
         }
 
         match task.state {
             TaskState::RECEIVED => self.task_count += 1,
             _ => {}
         }
-        Ok(())
     }
 }
 
 #[pymodule]
-fn celery_state(py: Python, m: &PyModule) -> PyResult<()> {
+fn celery_state(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<CeleryState>()?;
     Ok(())
 }
