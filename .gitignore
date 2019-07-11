@@ -1,8 +1,9 @@
+*.whl
 *.img
 /dist
 /build
 /*.egg-info
-
+target/
 *.pyc
 __pycache__
 .coverage

@@ -8,7 +8,8 @@ import celery
 import celery.states
 
 from .metrics import TASKS, TASKS_RUNTIME, LATENCY, WORKERS
-from .state import CeleryState
+from celery_state import CeleryState
+from .utils import get_config
 
 
 class TaskThread(threading.Thread):
@@ -35,6 +36,7 @@ class TaskThread(threading.Thread):
         if latency is not None:
             LATENCY.labels(namespace=self._namespace).observe(latency)
         (name, state, runtime, queue) = self._state.collect(evt)
+
         if name is not None:
             if runtime is not None:
                 TASKS_RUNTIME.labels(
@@ -112,7 +114,7 @@ def setup_metrics(app, namespace):
     """
     WORKERS.labels(namespace=namespace)
     LATENCY.labels(namespace=namespace)
-    config = CeleryState.get_config(app)
+    config = get_config(app)
 
     if not config:  # pragma: no cover
         for metric in TASKS.collect():
