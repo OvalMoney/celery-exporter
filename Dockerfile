@@ -20,12 +20,15 @@ RUN set -eux; \
     rustup toolchain install nightly-2019-06-20; \
     rustup default nightly-2019-06-20
 
-RUN pip install pyo3-pack==0.6.1
+RUN pip install pyo3-pack==0.6.1 setuptools-rust==0.10.6 wheel==0.33.4
 
 COPY Cargo.toml Cargo.lock setup.py README.md ./
 COPY src/ ./src
 
-RUN pyo3-pack  build --release -i python3 --out ./
+COPY  setup.py README.md ./
+COPY celery_exporter/  ./celery_exporter/
+
+RUN pip wheel . -w /src
 
 FROM python:3.6-stretch
 
@@ -46,16 +49,12 @@ LABEL org.label-schema.schema-version="1.0" \
 
 WORKDIR /app/
 
-COPY --from=build-rs /src/celery_state-0.1.0-cp36-cp36m-manylinux1_x86_64.whl .
+COPY --from=build-rs /src/celery_exporter-1.4.0-cp36-cp36m-linux_x86_64.whl .
 
 COPY requirements/ ./requirements
 RUN pip install -r ./requirements/requirements.txt
 
-COPY  setup.py README.md ./
-COPY celery_exporter/  ./celery_exporter/
-
-RUN pip install *.whl
-RUN pip install --no-deps -e .
+RUN pip install celery_exporter-1.4.0-cp36-cp36m-linux_x86_64.whl
 
 ENTRYPOINT ["celery-exporter"]
 CMD []

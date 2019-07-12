@@ -11,7 +11,7 @@ before_install:
   - chmod +x rustup-init
   - ./rustup-init -y --no-modify-path --default-toolchain nightly
   - rustup toolchain install nightly-2019-06-20 && nightly-2019-96-20
-install: pip install tox-travis tox
+install: pip install tox-travis tox pyo3-pack==0.6.1 setuptools-rust==0.10.6
 script: tox
 deploy:
   provider: pypi
