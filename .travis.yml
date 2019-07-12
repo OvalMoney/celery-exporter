@@ -2,9 +2,9 @@ sudo: false
 language: python
 
 python:
-  - "3.4"
   - "3.5"
   - "3.6"
+  - "3.7"
 
 env:
   - RUSTUP_HOME=~/rustup CARGO_HOME=~/cargo PATH=~/cargo/bin:$PATH
