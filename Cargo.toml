@@ -1,7 +1,7 @@
 [package]
 name = "celery_state"
 version = "0.1.0"
-authors = ["Nicola Martino <nicola.martino@ovalmoney.com>"]
+authors = ["Nicola Martino <mroci@bruttocarattere.org>"]
 edition = "2018"
 
 [lib]

@@ -49,14 +49,14 @@ class TestMockedCelery(BaseTest):
         assert (
             REGISTRY.get_sample_value(
                 "celery_tasks_latency_seconds_count",
-                labels=dict(namespace=self.namespace),
+                labels=dict(namespace=self.namespace, name=self.task, queue=self.queue),
             )
             == 0
         )
         assert (
             REGISTRY.get_sample_value(
                 "celery_tasks_latency_seconds_sum",
-                labels=dict(namespace=self.namespace),
+                labels=dict(namespace=self.namespace, name=self.task, queue=self.queue),
             )
             == 0
         )
@@ -123,14 +123,14 @@ class TestMockedCelery(BaseTest):
         assert (
             REGISTRY.get_sample_value(
                 "celery_tasks_latency_seconds_count",
-                labels=dict(namespace=self.namespace),
+                labels=dict(namespace=self.namespace, name=self.task, queue=self.queue),
             )
             == 0
         )
         assert (
             REGISTRY.get_sample_value(
                 "celery_tasks_latency_seconds_sum",
-                labels=dict(namespace=self.namespace),
+                labels=dict(namespace=self.namespace, name=self.task, queue=self.queue),
             )
             == 0
         )
@@ -234,14 +234,14 @@ class TestMockedCelery(BaseTest):
         assert (
             REGISTRY.get_sample_value(
                 "celery_tasks_latency_seconds_count",
-                labels=dict(namespace=self.namespace),
+                labels=dict(namespace=self.namespace, name=self.task, queue=self.queue),
             )
             == 1
         )
         self.assertAlmostEqual(
             REGISTRY.get_sample_value(
                 "celery_tasks_latency_seconds_sum",
-                labels=dict(namespace=self.namespace),
+                labels=dict(namespace=self.namespace, name=self.task, queue=self.queue),
             ),
             latency_before_started,
         )

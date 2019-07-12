@@ -8,6 +8,7 @@ use pyo3::types::PyDict;
 static CELERY_MISSING_DATA: &'static str = "undefined";
 
 type CollectOutcome = (Option<String>, Option<String>, Option<f64>, Option<String>); // name, state, runtime, queue
+type LatencyOutcome = (Option<String>, Option<String>, Option<f64>);
 
 #[derive(Clone)]
 struct Task {
@@ -38,14 +39,13 @@ impl Task {
             .extract()?; // GUARANTEED
         let splitted = kind.split("-");
         let state = splitted.collect::<Vec<&str>>()[1];
-        let uuid: String = evt
-            .get_item("uuid")
-            .expect("Invalid Event: missing uuid")
-            .extract()?; // GUARANTEED
+        let uuid = evt.get_item("uuid");
         let name = evt.get_item("name");
 
         if kind.contains("task") {
-            self.uuid = uuid.clone();
+            if let Some(u) = uuid {
+                self.uuid = u.to_string();
+            }
             self.state = event_to_state(state);
             self.local_received = evt
                 .get_item("local_received")
@@ -76,6 +76,7 @@ enum TaskState {
     UNDEFINED,
 }
 impl fmt::Display for TaskState {
+    // UEUE Solution
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self)
     }
@@ -158,7 +159,7 @@ impl CeleryState {
         }
     }
 
-    fn latency(&mut self, evt: &PyDict) -> PyResult<Option<f64>> {
+    fn latency(&mut self, evt: &PyDict) -> PyResult<LatencyOutcome> {
         let mut task = Task::default();
         task.update_from_event(evt)?;
         match task.state {
@@ -167,7 +168,15 @@ impl CeleryState {
                 match prev_evt {
                     Some(p) => match p.state {
                         TaskState::RECEIVED => {
-                            return Ok(Some(task.local_received - p.local_received))
+                            let name: String = p.name.clone();
+                            let queue: String = self
+                                .queue_by_task
+                                .get(&name)
+                                .unwrap_or(&CELERY_MISSING_DATA.to_string())
+                                .into();
+                            let latency = task.local_received - p.local_received;
+
+                            return Ok((Some(name), Some(queue), Some(latency)));
                         }
                         _ => {}
                     },
@@ -176,7 +185,7 @@ impl CeleryState {
             }
             _ => {}
         }
-        return Ok(None);
+        return Ok((None, None, None));
     }
 }
 

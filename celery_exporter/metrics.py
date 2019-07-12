@@ -11,7 +11,7 @@ TASKS_RUNTIME = prometheus_client.Histogram(
 LATENCY = prometheus_client.Histogram(
     "celery_tasks_latency_seconds",
     "Time between a task is received and started.",
-    ["namespace"],
+    ["namespace", "name", "queue"],
 )
 WORKERS = prometheus_client.Gauge(
     "celery_workers", "Number of alive workers", ["namespace"]

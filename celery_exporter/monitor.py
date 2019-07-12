@@ -32,9 +32,11 @@ class TaskThread(threading.Thread):
         self._monitor()
 
     def _process_event(self, evt):
-        latency = self._state.latency(evt)
+        (name, queue, latency) = self._state.latency(evt)
         if latency is not None:
-            LATENCY.labels(namespace=self._namespace).observe(latency)
+            LATENCY.labels(namespace=self._namespace, name=name, queue=queue).observe(
+                latency
+            )
         (name, state, runtime, queue) = self._state.collect(evt)
 
         if name is not None:
@@ -113,7 +115,6 @@ def setup_metrics(app, namespace):
     even before the first event is received, data can be exposed.
     """
     WORKERS.labels(namespace=namespace)
-    LATENCY.labels(namespace=namespace)
     config = get_config(app)
 
     if not config:  # pragma: no cover
@@ -121,6 +122,7 @@ def setup_metrics(app, namespace):
             for name, labels, cnt in metric.samples:
                 TASKS.labels(**labels)
     else:
-        for state in celery.states.ALL_STATES:
-            for task, queue in config.items():
+        for task, queue in config.items():
+            LATENCY.labels(namespace=namespace, name=task, queue=queue)
+            for state in celery.states.ALL_STATES:
                 TASKS.labels(namespace=namespace, name=task, state=state, queue=queue)
