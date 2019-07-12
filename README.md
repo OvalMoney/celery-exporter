@@ -138,25 +138,25 @@ celery_tasks_runtime_seconds_created{name="my_app.tasks.calculate_something",nam
 celery_tasks_runtime_seconds_created{name="my_app.tasks.fetch_some_data",namespace="celery",queue="celery"} 1.5489449550243628e+09
 # HELP celery_tasks_latency_seconds Seconds between a task is received and started.
 # TYPE celery_tasks_latency_seconds histogram
-celery_tasks_latency_seconds_bucket{namespace="celery",le="0.005"} 2.0
-celery_tasks_latency_seconds_bucket{namespace="celery",le="0.01"} 3.0
-celery_tasks_latency_seconds_bucket{namespace="celery",le="0.025"} 4.0
-celery_tasks_latency_seconds_bucket{namespace="celery",le="0.05"} 4.0
-celery_tasks_latency_seconds_bucket{namespace="celery",le="0.075"} 5.0
-celery_tasks_latency_seconds_bucket{namespace="celery",le="0.1"} 5.0
-celery_tasks_latency_seconds_bucket{namespace="celery",le="0.25"} 5.0
-celery_tasks_latency_seconds_bucket{namespace="celery",le="0.5"} 5.0
-celery_tasks_latency_seconds_bucket{namespace="celery",le="0.75"} 5.0
-celery_tasks_latency_seconds_bucket{namespace="celery",le="1.0"} 5.0
-celery_tasks_latency_seconds_bucket{namespace="celery",le="2.5"} 8.0
-celery_tasks_latency_seconds_bucket{namespace="celery",le="5.0"} 11.0
-celery_tasks_latency_seconds_bucket{namespace="celery",le="7.5"} 11.0
-celery_tasks_latency_seconds_bucket{namespace="celery",le="10.0"} 11.0
-celery_tasks_latency_seconds_bucket{namespace="celery",le="+Inf"} 11.0
-celery_tasks_latency_seconds_count{namespace="celery"} 11.0
-celery_tasks_latency_seconds_sum{namespace="celery"} 16.478713035583496
+celery_tasks_latency_seconds_bucket{namespace="celery",name="my_app.tasks.fetch_some_data",queue="celery",le="0.005"} 2.0
+celery_tasks_latency_seconds_bucket{namespace="celery",name="my_app.tasks.fetch_some_data",queue="celery",le="0.01"} 3.0
+celery_tasks_latency_seconds_bucket{namespace="celery",name="my_app.tasks.fetch_some_data",queue="celery",le="0.025"} 4.0
+celery_tasks_latency_seconds_bucket{namespace="celery",name="my_app.tasks.fetch_some_data",queue="celery",le="0.05"} 4.0
+celery_tasks_latency_seconds_bucket{namespace="celery",name="my_app.tasks.fetch_some_data",queue="celery",le="0.075"} 5.0
+celery_tasks_latency_seconds_bucket{namespace="celery",name="my_app.tasks.fetch_some_data",queue="celery",le="0.1"} 5.0
+celery_tasks_latency_seconds_bucket{namespace="celery",name="my_app.tasks.fetch_some_data",queue="celery",le="0.25"} 5.0
+celery_tasks_latency_seconds_bucket{namespace="celery",name="my_app.tasks.fetch_some_data",queue="celery",le="0.5"} 5.0
+celery_tasks_latency_seconds_bucket{namespace="celery",name="my_app.tasks.fetch_some_data",queue="celery",le="0.75"} 5.0
+celery_tasks_latency_seconds_bucket{namespace="celery",name="my_app.tasks.fetch_some_data",queue="celery",le="1.0"} 5.0
+celery_tasks_latency_seconds_bucket{namespace="celery",name="my_app.tasks.fetch_some_data",queue="celery",le="2.5"} 8.0
+celery_tasks_latency_seconds_bucket{namespace="celery",name="my_app.tasks.fetch_some_data",queue="celery",le="5.0"} 11.0
+celery_tasks_latency_seconds_bucket{namespace="celery",name="my_app.tasks.fetch_some_data",queue="celery",le="7.5"} 11.0
+celery_tasks_latency_seconds_bucket{namespace="celery",name="my_app.tasks.fetch_some_data",queue="celery",le="10.0"} 11.0
+celery_tasks_latency_seconds_bucket{namespace="celery",name="my_app.tasks.fetch_some_data",queue="celery",le="+Inf"} 11.0
+celery_tasks_latency_seconds_count{namespace="celery",name="my_app.tasks.fetch_some_data",queue="celery"} 11.0
+celery_tasks_latency_seconds_sum{namespace="celery",name="my_app.tasks.fetch_some_data",queue="celery"} 16.478713035583496
 # TYPE celery_task_latency_created gauge
-celery_task_latency_seconds_created{namespace="celery"} 1.5489449475378375e+09
+celery_task_latency_seconds_created{namespace="celery",name="my_app.tasks.fetch_some_data",queue="celery"} 1.5489449475378375e+09
 ```
 
 ### Inspired by @zerok work
