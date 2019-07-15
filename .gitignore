@@ -13,5 +13,5 @@ __pycache__
 .python-version
 .pytest_cache
 htmlcov/
-
+dive.log
 .vscode
