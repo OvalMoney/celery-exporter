@@ -21,10 +21,12 @@ def get_config(app):
     except Exception:  # pragma: no cover
         return res
 
+    default_queues = []
     for task_name in set(chain.from_iterable(registered_tasks)):
         for conf in confs.values():
             default = conf.get("task_default_queue", CELERY_DEFAULT_QUEUE)
-            if task_name in res and res[task_name] != default:
+            default_queues.append(default)
+            if task_name in res and res[task_name] not in default_queues:
                 break
 
             task_wildcard_names = _gen_wildcards(task_name)
