@@ -1,0 +1,18 @@
+[package]
+name = "celery_state"
+version = "0.1.0"
+authors = ["Nicola Martino <mroci@bruttocarattere.org>"]
+edition = "2018"
+
+[lib]
+name = "celery_state"
+crate-type = ["cdylib"]
+
+[dependencies.pyo3]
+version = "0.7.0"
+features = ["extension-module"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+lru = "0.1.15"

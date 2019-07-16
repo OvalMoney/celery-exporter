@@ -1,4 +1,7 @@
 *
+!Cargo.toml
+!Cargo.lock
+!src
 !setup.py
 !README.md
 !celery_exporter

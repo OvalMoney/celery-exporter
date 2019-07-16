@@ -16,7 +16,7 @@ from celery_exporter.monitor import (
     setup_metrics,
 )
 
-from celery_exporter.state import CELERY_MISSING_DATA, CeleryState
+from celery_exporter.utils import CELERY_MISSING_DATA, get_config, _gen_wildcards
 
 from celery_test_utils import BaseTest, get_celery_app
 
@@ -49,14 +49,14 @@ class TestMockedCelery(BaseTest):
         assert (
             REGISTRY.get_sample_value(
                 "celery_tasks_latency_seconds_count",
-                labels=dict(namespace=self.namespace),
+                labels=dict(namespace=self.namespace, name=self.task, queue=self.queue),
             )
             == 0
         )
         assert (
             REGISTRY.get_sample_value(
                 "celery_tasks_latency_seconds_sum",
-                labels=dict(namespace=self.namespace),
+                labels=dict(namespace=self.namespace, name=self.task, queue=self.queue),
             )
             == 0
         )
@@ -123,14 +123,14 @@ class TestMockedCelery(BaseTest):
         assert (
             REGISTRY.get_sample_value(
                 "celery_tasks_latency_seconds_count",
-                labels=dict(namespace=self.namespace),
+                labels=dict(namespace=self.namespace, name=self.task, queue=self.queue),
             )
             == 0
         )
         assert (
             REGISTRY.get_sample_value(
                 "celery_tasks_latency_seconds_sum",
-                labels=dict(namespace=self.namespace),
+                labels=dict(namespace=self.namespace, name=self.task, queue=self.queue),
             )
             == 0
         )
@@ -234,14 +234,14 @@ class TestMockedCelery(BaseTest):
         assert (
             REGISTRY.get_sample_value(
                 "celery_tasks_latency_seconds_count",
-                labels=dict(namespace=self.namespace),
+                labels=dict(namespace=self.namespace, name=self.task, queue=self.queue),
             )
             == 1
         )
         self.assertAlmostEqual(
             REGISTRY.get_sample_value(
                 "celery_tasks_latency_seconds_sum",
-                labels=dict(namespace=self.namespace),
+                labels=dict(namespace=self.namespace, name=self.task, queue=self.queue),
             ),
             latency_before_started,
         )
@@ -304,7 +304,7 @@ class TestMockedCelery(BaseTest):
             "aaa": ["aaa", "*"],
         }
         for case, expectation in strings.items():
-            result = CeleryState._gen_wildcards(case)
+            result = _gen_wildcards(case)
             assert result == expectation
 
     def _assert_task_states(self, states, cnt):

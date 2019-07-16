@@ -3,6 +3,7 @@
 
 # $IMAGE_NAME var is injected into the build so the tag is correct. 
 docker build \
+  --target app
   --build-arg DOCKER_REPO=$DOCKER_REPO \
   --build-arg VERSION=$CACHE_TAG \
   --build-arg VCS_REF=$SOURCE_COMMIT \

@@ -1,8 +1,10 @@
+*.so
+*.whl
 *.img
 /dist
 /build
 /*.egg-info
-
+target/
 *.pyc
 __pycache__
 .coverage
@@ -11,5 +13,5 @@ __pycache__
 .python-version
 .pytest_cache
 htmlcov/
-
+dive.log
 .vscode

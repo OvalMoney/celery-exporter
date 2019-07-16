@@ -2,11 +2,19 @@ sudo: false
 language: python
 
 python:
-  - "3.4"
   - "3.5"
   - "3.6"
+  - "3.7"
 
-install: pip install tox-travis tox
+env:
+  - RUSTUP_HOME=~/rustup CARGO_HOME=~/cargo PATH=~/cargo/bin:$PATH
+
+install:
+  - wget https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init
+  - chmod +x rustup-init
+  - ./rustup-init -y --no-modify-path --default-toolchain nightly-2019-06-20
+  - chmod -R a+w $RUSTUP_HOME $CARGO_HOME
+  - pip install tox-travis tox pyo3-pack==0.6.1 setuptools-rust==0.10.6
 script: tox
 deploy:
   provider: pypi
