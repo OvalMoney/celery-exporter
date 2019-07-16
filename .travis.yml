@@ -12,8 +12,9 @@ env:
 install:
   - wget https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init
   - chmod +x rustup-init
-  - ./rustup-init -y --no-modify-path --default-toolchain nightly-2019-06-20
+  - ./rustup-init -y --no-modify-path --default-toolchain nightly
   - chmod -R a+w $RUSTUP_HOME $CARGO_HOME
+  - rustup toolchain install nightly-2019-06-20 && rustup default nightly-2019-06-20
   - pip install tox-travis tox pyo3-pack==0.6.1 setuptools-rust==0.10.6
 script: tox
 deploy:

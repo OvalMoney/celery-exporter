@@ -25,7 +25,7 @@ setup(
         "Programming Language :: Python :: 3 :: Only",
         "Operating System :: OS Independent",
     ],
-    rust_extensions=[RustExtension("celery_state", binding=Binding.PyO3)],
+    rust_extensions=[RustExtension("celery_state", binding=Binding.PyO3,debug=False)],
     packages=["celery_exporter"],
     install_requires=["click>=7" "celery>=4", "prometheus_client>=0.0.20"],
     entry_points={
