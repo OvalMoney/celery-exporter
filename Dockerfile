@@ -1,21 +1,14 @@
 FROM python:3.6-alpine as base-image
 
+ENV LANG=C.UTF-8
+
 RUN ALPINE_GLIBC_BASE_URL="https://github.com/sgerrand/alpine-pkg-glibc/releases/download" && \
     ALPINE_GLIBC_PACKAGE_VERSION="2.29-r0" && \
     ALPINE_GLIBC_BASE_PACKAGE_FILENAME="glibc-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
     ALPINE_GLIBC_BIN_PACKAGE_FILENAME="glibc-bin-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
     ALPINE_GLIBC_I18N_PACKAGE_FILENAME="glibc-i18n-$ALPINE_GLIBC_PACKAGE_VERSION.apk" && \
     apk add --no-cache wget ca-certificates && \
-    echo \
-        "-----BEGIN PUBLIC KEY-----\
-        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApZ2u1KJKUu/fW4A25y9m\
-        y70AGEa/J3Wi5ibNVGNn1gT1r0VfgeWd0pUybS4UmcHdiNzxJPgoWQhV2SSW1JYu\
-        tOqKZF5QSN6X937PTUpNBjUvLtTQ1ve1fp39uf/lEXPpFpOPL88LKnDBgbh7wkCp\
-        m2KzLVGChf83MS0ShL6G9EQIAUxLm99VpgRjwqTQ/KfzGtpke1wqws4au0Ab4qPY\
-        KXvMLSPLUp7cfulWvhmZSegr5AdhNw5KNizPqCJT8ZrGvgHypXyiFvvAH5YRtSsc\
-        Zvo9GI2e2MaZyo9/lvb+LbLEJZKEQckqRj4P26gmASrZEPStwc+yqy1ShHLA0j6m\
-        1QIDAQAB\
-        -----END PUBLIC KEY-----" | sed 's/   */\n/g' > "/etc/apk/keys/sgerrand.rsa.pub"  && \
+    wget "https://alpine-pkgs.sgerrand.com/sgerrand.rsa.pub" -O /etc/apk/keys/sgerrand.rsa.pub && \
     wget "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BASE_PACKAGE_FILENAME"  && \
     wget "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_BIN_PACKAGE_FILENAME"  && \
     wget "$ALPINE_GLIBC_BASE_URL/$ALPINE_GLIBC_PACKAGE_VERSION/$ALPINE_GLIBC_I18N_PACKAGE_FILENAME"  && \
@@ -41,19 +34,15 @@ ENV RUSTUP_HOME=/usr/local/rustup \
 
 WORKDIR /src
 
-RUN set -eux; \
-    apk add --no-cache alpine-sdk bash; \
-    wget https://sh.rustup.rs -O rustup-init ; \
-    chmod +x ./rustup-init; \
-    ./rustup-init -y --no-modify-path --default-toolchain nightly-2019-06-20; \
-    rm -rf rustup-init
-
-RUN pip install setuptools-rust wheel
+RUN apk add --no-cache alpine-sdk bash && \
+    wget "https://sh.rustup.rs" -O rustup-init && \
+    chmod +x ./rustup-init && \
+    ./rustup-init -y --no-modify-path --default-toolchain nightly-2019-06-20 && \
+    rm -rf rustup-init && \
+    pip install setuptools-rust wheel
 
 COPY Cargo.toml Cargo.lock setup.py README.md ./
 COPY src/ ./src
-
-COPY setup.py README.md ./
 COPY celery_exporter/  ./celery_exporter/
 
 RUN pip wheel . -w /src

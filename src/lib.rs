@@ -46,7 +46,7 @@ impl Task {
             if let Some(u) = uuid {
                 self.uuid = u.to_string();
             }
-            self.state = event_to_state(state);
+            self.state = TaskState::from_event(state);
             self.local_received = evt
                 .get_item("local_received")
                 .expect("Invalid Event: missing local_received")
@@ -82,17 +82,19 @@ impl fmt::Display for TaskState {
     }
 }
 
-fn event_to_state(evt_kind: &str) -> TaskState {
-    match evt_kind {
-        "sent" => TaskState::PENDING,
-        "received" => TaskState::RECEIVED,
-        "started" => TaskState::STARTED,
-        "failed" => TaskState::FAILURE,
-        "retried" => TaskState::RETRY,
-        "succeeded" => TaskState::SUCCESS,
-        "revoked" => TaskState::REVOKED,
-        "rejected" => TaskState::REJECTED,
-        _ => TaskState::UNDEFINED,
+impl TaskState {
+    fn from_event(evt_kind: &str) -> Self {
+        match evt_kind {
+            "sent" => TaskState::PENDING,
+            "received" => TaskState::RECEIVED,
+            "started" => TaskState::STARTED,
+            "failed" => TaskState::FAILURE,
+            "retried" => TaskState::RETRY,
+            "succeeded" => TaskState::SUCCESS,
+            "revoked" => TaskState::REVOKED,
+            "rejected" => TaskState::REJECTED,
+            _ => TaskState::UNDEFINED,
+        }
     }
 }
 
