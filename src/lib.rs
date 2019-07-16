@@ -10,6 +10,13 @@ static CELERY_MISSING_DATA: &'static str = "undefined";
 type CollectOutcome = (Option<String>, Option<String>, Option<f64>, Option<String>); // name, state, runtime, queue
 type LatencyOutcome = (Option<String>, Option<String>, Option<f64>);
 
+fn is_task_event(kind: &str) -> bool {
+    if kind.contains("task") {
+        return true;
+    }
+    false
+}
+
 #[derive(Clone)]
 struct Task {
     uuid: String,
@@ -36,13 +43,13 @@ impl Task {
         let kind: String = evt
             .get_item("type")
             .expect("Invalid Event: missing type")
-            .extract()?; // GUARANTEED
+            .extract()?;
         let splitted = kind.split("-");
         let state = splitted.collect::<Vec<&str>>()[1];
         let uuid = evt.get_item("uuid");
         let name = evt.get_item("name");
 
-        if kind.contains("task") {
+        if is_task_event(&kind) {
             if let Some(u) = uuid {
                 self.uuid = u.to_string();
             }
@@ -119,6 +126,15 @@ impl CeleryState {
     }
 
     fn collect(&mut self, evt: &PyDict) -> PyResult<CollectOutcome> {
+        let kind: String = evt
+            .get_item("type")
+            .expect("Invalid Event: missing type")
+            .extract()?;
+
+        if !is_task_event(&kind) {
+            return Ok((None, None, None, None));
+        }
+
         let mut task = Task::default();
         task.update_from_event(evt)?;
 
@@ -162,6 +178,15 @@ impl CeleryState {
     }
 
     fn latency(&mut self, evt: &PyDict) -> PyResult<LatencyOutcome> {
+        let kind: String = evt
+            .get_item("type")
+            .expect("Invalid Event: missing type")
+            .extract()?;
+
+        if !is_task_event(&kind) {
+            return Ok((None, None, None));
+        }
+
         let mut task = Task::default();
         task.update_from_event(evt)?;
         match task.state {
