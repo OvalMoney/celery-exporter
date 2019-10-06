@@ -27,7 +27,7 @@ setup(
     ],
     rust_extensions=[RustExtension("celery_state", binding=Binding.PyO3, debug=False)],
     packages=["celery_exporter"],
-    install_requires=["click>=7" "celery>=4", "prometheus_client>=0.0.20"],
+    install_requires=["click>=7", "celery>=4", "prometheus_client>=0.0.20"],
     entry_points={
         "console_scripts": ["celery-exporter = celery_exporter.__main__:main"]
     },
