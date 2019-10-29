@@ -16,10 +16,19 @@ install:
   - chmod -R a+w $RUSTUP_HOME $CARGO_HOME
   - pip install tox-travis tox pyo3-pack==0.6.1 setuptools-rust==0.10.6
 script: tox
-deploy:
-  provider: pypi
-  user: $PYPI_USER
-  password: $PYPI_PASSWORD
-  on:
-    tags: true
-  skip_existing: true
+
+jobs:
+  include:
+    - stage: deploy
+      if: tag IS present
+      sudo: required
+      services:
+        - docker
+      env: TWINE_USERNAME=$PYPI_USER
+           TWINE_PASSWORD=$PYPI_PASSWORD
+      before_script:
+        - pip install setuptools-rust==0.10.6 twine
+      script:
+        - python setup.py sdist
+        - docker run --rm -v `pwd`:/io quay.io/pypa/manylinux1_x86_64 /io/ci/build-wheels.sh
+        - twine upload --skip-existing dist/*

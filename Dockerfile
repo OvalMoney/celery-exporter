@@ -45,7 +45,7 @@ COPY Cargo.toml Cargo.lock setup.py README.md ./
 COPY src/ ./src
 COPY celery_exporter/  ./celery_exporter/
 
-RUN pip wheel . -w /src
+RUN pip wheel . -w /src/wheelhouse
 
 FROM base-image as app
 LABEL maintainer="Fabio Todaro <ft@ovalmoney.com>"
@@ -65,12 +65,12 @@ LABEL org.label-schema.schema-version="1.0" \
 
 WORKDIR /app/
 
-COPY --from=build-rs /src/celery_exporter-1.4.0-cp36-cp36m-linux_x86_64.whl .
+COPY --from=build-rs /src/wheelhouse/ /app/wheelhouse/
 
 COPY requirements/ ./requirements
 RUN pip install -r ./requirements/requirements.txt
 
-RUN pip install celery_exporter-1.4.0-cp36-cp36m-linux_x86_64.whl
+RUN pip install wheelhouse/*
 
 ENTRYPOINT ["celery-exporter"]
 CMD []
