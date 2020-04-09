@@ -4,6 +4,7 @@ from celery_test_utils import BaseTest
 import celery
 import celery_exporter.monitor
 from celery_exporter.core import CeleryExporter
+from prometheus_client import Histogram
 
 prom_http_server_mock = MagicMock(return_value=None)
 setup_metrics_mock = MagicMock(return_value=None)
@@ -33,7 +34,10 @@ class TestCeleryExporter(BaseTest):
     def test_setup_metrics(self):
         self.cel_exp.start()
         setup_metrics_mock.assert_called_with(
-            self.cel_exp._app, TestCeleryExporter.namespace
+            self.cel_exp._app,
+            TestCeleryExporter.namespace,
+            Histogram.DEFAULT_BUCKETS,
+            Histogram.DEFAULT_BUCKETS,
         )
 
     def test_http_server(self):
@@ -46,6 +50,8 @@ class TestCeleryExporter(BaseTest):
             self.cel_exp._app,
             TestCeleryExporter.namespace,
             TestCeleryExporter.max_tasks,
+            runtime_histogram_bucket=Histogram.DEFAULT_BUCKETS,
+            latency_histogram_bucket=Histogram.DEFAULT_BUCKETS,
         )
 
     def test_worker_thread(self):

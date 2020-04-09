@@ -20,18 +20,27 @@ class CeleryExporter:
         namespace="celery",
         transport_options=None,
         enable_events=False,
+        runtime_histogram_bucket=prometheus_client.Histogram.DEFAULT_BUCKETS,
+        latency_histogram_bucket=prometheus_client.Histogram.DEFAULT_BUCKETS,
     ):
         self._listen_address = listen_address
         self._max_tasks = max_tasks
         self._namespace = namespace
         self._enable_events = enable_events
+        self._runtime_histogram_bucket = runtime_histogram_bucket
+        self._latency_histogram_bucket = latency_histogram_bucket
 
         self._app = celery.Celery(broker=broker_url)
         self._app.conf.broker_transport_options = transport_options or {}
 
     def start(self):
 
-        setup_metrics(self._app, self._namespace)
+        setup_metrics(
+            self._app,
+            self._namespace,
+            self._runtime_histogram_bucket,
+            self._latency_histogram_bucket,
+        )
 
         self._start_httpd()
 
@@ -39,6 +48,8 @@ class CeleryExporter:
             app=self._app,
             namespace=self._namespace,
             max_tasks_in_memory=self._max_tasks,
+            runtime_histogram_bucket=self._runtime_histogram_bucket,
+            latency_histogram_bucket=self._latency_histogram_bucket,
         )
         t.daemon = True
         t.start()
