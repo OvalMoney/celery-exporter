@@ -24,6 +24,13 @@ LOG_FORMAT = "[%(asctime)s] %(name)s:%(levelname)s: %(message)s"
     help="URL to the Celery broker.",
 )
 @click.option(
+    "--broker-use-ssl",
+    is_flag=True,
+    allow_from_autoenv=False,
+    default=False,
+    help="Celery broker use TLS/SSL.",
+)
+@click.option(
     "--listen-address",
     "-l",
     type=str,
@@ -71,6 +78,7 @@ LOG_FORMAT = "[%(asctime)s] %(name)s:%(levelname)s: %(message)s"
 @click.version_option(version=".".join([str(x) for x in __VERSION__]))
 def main(
     broker_url,
+    broker_use_ssl,
     listen_address,
     max_tasks,
     namespace,
@@ -103,6 +111,7 @@ def main(
 
     celery_exporter = CeleryExporter(
         broker_url,
+        broker_use_ssl,
         listen_address,
         max_tasks,
         namespace,

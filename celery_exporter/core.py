@@ -15,6 +15,7 @@ class CeleryExporter:
     def __init__(
         self,
         broker_url,
+        broker_use_ssl,
         listen_address,
         max_tasks=10000,
         namespace="celery",
@@ -26,7 +27,7 @@ class CeleryExporter:
         self._namespace = namespace
         self._enable_events = enable_events
 
-        self._app = celery.Celery(broker=broker_url)
+        self._app = celery.Celery(broker=broker_url, broker_use_ssl=broker_use_ssl)
         self._app.conf.broker_transport_options = transport_options or {}
 
     def start(self):
