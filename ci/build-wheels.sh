@@ -3,16 +3,16 @@ set -ex
 
 curl -o rustup-init https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init
 chmod +x rustup-init
-./rustup-init -y --no-modify-path --default-toolchain nightly-2019-06-20
+./rustup-init -y --no-modify-path --default-toolchain stable
 export PATH="$HOME/.cargo/bin:$PATH"
 
 cd /io
 
-for PYBIN in /opt/python/{cp35-cp35m,cp36-cp36m,cp37-cp37m}/bin; do
+for PYBIN in /opt/python/{cp35-cp35m,cp36-cp36m,cp37-cp37m,cp38-cp38}/bin; do
     export PYTHON_SYS_EXECUTABLE="$PYBIN/python"
 
-    "${PYBIN}/pip" install -U setuptools wheel setuptools-rust
-    "${PYBIN}/python" setup.py bdist_wheel
+    "${PYBIN}/pip" install -U maturin
+    "${PYBIN}/maturin" build --release -i "${PYBIN}/python" -o dist/
 done
 
 PYBIN=/opt/python/cp37-cp37m/bin

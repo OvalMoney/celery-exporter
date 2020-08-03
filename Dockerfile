@@ -37,15 +37,17 @@ WORKDIR /src
 RUN apk add --no-cache alpine-sdk bash && \
     wget "https://sh.rustup.rs" -O rustup-init && \
     chmod +x ./rustup-init && \
-    ./rustup-init -y --no-modify-path --default-toolchain nightly-2019-06-20 --default-host x86_64-unknown-linux-gnu && \
+    ./rustup-init -y --no-modify-path --default-toolchain stable --default-host x86_64-unknown-linux-gnu && \
     rm -rf rustup-init && \
-    pip install setuptools-rust wheel
+    wget "https://github.com/PyO3/maturin/releases/download/v0.8.2/maturin-v0.8.2-i686-unknown-linux-musl.tar.gz" -O maturin.tar.gz && \
+    tar -C /usr/local/cargo/bin -zxf maturin.tar.gz && \
+    rm -rf maturin.tar.gz
 
-COPY Cargo.toml Cargo.lock setup.py README.md ./
+COPY Cargo.toml Cargo.lock README.md ./
 COPY src/ ./src
 COPY celery_exporter/  ./celery_exporter/
 
-RUN pip wheel . -w /src/wheelhouse
+RUN maturin build --release -o /src/wheelhouse
 
 FROM base-image as app
 LABEL maintainer="Fabio Todaro <ft@ovalmoney.com>"

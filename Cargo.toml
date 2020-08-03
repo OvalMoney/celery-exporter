@@ -1,18 +1,36 @@
 [package]
-name = "celery_state"
-version = "0.1.0"
+name = "celery_exporter"
+version = "1.4.0"
 authors = ["Nicola Martino <mroci@bruttocarattere.org>"]
+description = "Prometheus metrics exporter for Celery"
 edition = "2018"
+homepage = "https://github.com/OvalMoney/celery-exporter"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/OvalMoney/celery-exporter.git"
 
 [lib]
-name = "celery_state"
+name = "celery_exporter"
 crate-type = ["cdylib"]
 
 [dependencies.pyo3]
-version = "0.7.0"
+version = "0.11.1"
 features = ["extension-module"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-lru = "0.1.15"
+lru = "0.6.0"
+
+[package.metadata.maturin]
+classifier = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3 :: Only",
+    "Operating System :: OS Independent"
+]
+
+[package.metadata.maturin.scripts]
+celery-exporter = "celery_exporter.__main__:main"

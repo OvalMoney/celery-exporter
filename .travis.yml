@@ -5,6 +5,7 @@ python:
   - "3.5"
   - "3.6"
   - "3.7"
+  - "3.8"
 
 env:
   - RUSTUP_HOME=~/rustup CARGO_HOME=~/cargo PATH=~/cargo/bin:$PATH
@@ -12,9 +13,9 @@ env:
 install:
   - wget https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init
   - chmod +x rustup-init
-  - ./rustup-init -y --no-modify-path --default-toolchain nightly-2019-06-20
+  - ./rustup-init -y --no-modify-path --default-toolchain stable
   - chmod -R a+w $RUSTUP_HOME $CARGO_HOME
-  - pip install tox-travis tox pyo3-pack==0.6.1 setuptools-rust==0.10.6
+  - pip install tox-travis tox maturin
 script: tox
 
 jobs:
@@ -27,8 +28,8 @@ jobs:
       env: TWINE_USERNAME=$PYPI_USER
            TWINE_PASSWORD=$PYPI_PASSWORD
       before_script:
-        - pip install setuptools-rust==0.10.6 twine
+        - pip install twine maturin
       script:
-        - python setup.py sdist
+        - maturin sdist
         - docker run --rm -v `pwd`:/io quay.io/pypa/manylinux1_x86_64 /io/ci/build-wheels.sh
         - twine upload --skip-existing dist/*
