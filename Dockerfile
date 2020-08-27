@@ -37,9 +37,9 @@ WORKDIR /src
 RUN apk add --no-cache alpine-sdk bash && \
     wget "https://sh.rustup.rs" -O rustup-init && \
     chmod +x ./rustup-init && \
-    ./rustup-init -y --no-modify-path --default-toolchain stable --default-host x86_64-unknown-linux-gnu && \
+    ./rustup-init -y --no-modify-path --default-toolchain stable --default-host x86_64-unknown-linux-musl && \
     rm -rf rustup-init && \
-    wget "https://github.com/PyO3/maturin/releases/download/v0.8.2/maturin-v0.8.2-i686-unknown-linux-musl.tar.gz" -O maturin.tar.gz && \
+    wget "https://github.com/PyO3/maturin/releases/download/v0.8.3/maturin-v0.8.3-x86_64-unknown-linux-musl.tar.gz" -O maturin.tar.gz && \
     tar -C /usr/local/cargo/bin -zxf maturin.tar.gz && \
     rm -rf maturin.tar.gz
 
@@ -47,7 +47,7 @@ COPY Cargo.toml Cargo.lock README.md ./
 COPY src/ ./src
 COPY celery_exporter/  ./celery_exporter/
 
-RUN maturin build --release -o /src/wheelhouse
+RUN RUSTFLAGS="-C target-feature=-crt-static" maturin build --target x86_64-unknown-linux-musl --release --manylinux off -o /src/wheelhouse
 
 FROM base-image as app
 LABEL maintainer="Fabio Todaro <ft@ovalmoney.com>"
