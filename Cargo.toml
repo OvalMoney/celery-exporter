@@ -14,7 +14,7 @@ name = "celery_exporter"
 crate-type = ["cdylib"]
 
 [dependencies.pyo3]
-version = "0.11.1"
+version = "0.12.0"
 features = ["extension-module"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
