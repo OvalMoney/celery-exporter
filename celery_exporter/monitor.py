@@ -119,7 +119,7 @@ def setup_metrics(app, namespace):
 
     if not config:  # pragma: no cover
         for metric in TASKS.collect():
-            for name, labels, cnt in metric.samples:
+            for name, labels, cnt, timestamp, exemplar in metric.samples:
                 TASKS.labels(**labels)
     else:
         for task, queue in config.items():
