@@ -25,8 +25,10 @@ LOG_FORMAT = "[%(asctime)s] %(name)s:%(levelname)s: %(message)s"
 )
 @click.option(
     "--broker-use-ssl",
+    "-s",
     is_flag=True,
-    allow_from_autoenv=False,
+    show_default=True,
+    show_envvar=True,
     default=False,
     help="Celery broker use TLS/SSL.",
 )

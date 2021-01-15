@@ -59,7 +59,7 @@ Options:
   -b, --broker-url TEXT      URL to the Celery broker.  [env var:
                              CELERY_EXPORTER_BROKER_URL; default:
                              redis://redis:6379/0]
-  --broker-use-ssl           Enable TLS/SSL on the Celery broker
+  -s, --broker-use-ssl       Enable TLS/SSL on the Celery broker
   -l, --listen-address TEXT  Address the HTTPD should listen on.  [env var:
                              CELERY_EXPORTER_LISTEN_ADDRESS; default:
                              0.0.0.0:9540]
