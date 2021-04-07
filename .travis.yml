@@ -14,7 +14,7 @@ install:
   - chmod +x rustup-init
   - ./rustup-init -y --no-modify-path --default-toolchain nightly-2019-06-20
   - chmod -R a+w $RUSTUP_HOME $CARGO_HOME
-  - pip install tox-travis tox pyo3-pack==0.6.1 setuptools-rust==0.10.6
+  - pip install tox-travis tox pyo3-pack==0.6.1 setuptools-rust==0.11.6
 script: tox
 
 jobs:
@@ -27,7 +27,7 @@ jobs:
       env: TWINE_USERNAME=$PYPI_USER
            TWINE_PASSWORD=$PYPI_PASSWORD
       before_script:
-        - pip install setuptools-rust==0.10.6 twine
+        - pip install setuptools-rust==0.11.6 twine
       script:
         - python setup.py sdist
         - docker run --rm -v `pwd`:/io quay.io/pypa/manylinux1_x86_64 /io/ci/build-wheels.sh
