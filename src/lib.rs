@@ -116,13 +116,13 @@ struct CeleryState {
 #[pymethods]
 impl CeleryState {
     #[new]
-    fn new(obj: &PyRawObject, max_tasks_in_memory: usize) {
-        obj.init(CeleryState {
+    fn new(max_tasks_in_memory: usize) -> Self {
+        CeleryState {
             event_count: 0,
             task_count: 0,
             queue_by_task: HashMap::new(),
             tasks: LruCache::new(max_tasks_in_memory),
-        });
+        }
     }
 
     fn collect(&mut self, evt: &PyDict) -> PyResult<CollectOutcome> {
@@ -221,7 +221,7 @@ impl CeleryState {
         self.event_count += 1;
 
         match self.tasks.get(&task.uuid) {
-            None => self.tasks.put(task.uuid.to_string(), task.clone()),
+            None => { self.tasks.put(task.uuid.to_string(), task.clone()); }
             _ => {}
         }
 
