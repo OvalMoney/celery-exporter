@@ -37,7 +37,7 @@ WORKDIR /src
 RUN apk add --no-cache alpine-sdk bash && \
     wget "https://sh.rustup.rs" -O rustup-init && \
     chmod +x ./rustup-init && \
-    ./rustup-init -y --no-modify-path --default-toolchain nightly-2019-06-20 --default-host x86_64-unknown-linux-gnu && \
+    ./rustup-init -y --no-modify-path --default-toolchain stable --default-host x86_64-unknown-linux-gnu && \
     rm -rf rustup-init && \
     pip install setuptools-rust wheel
 

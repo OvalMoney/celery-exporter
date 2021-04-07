@@ -3,7 +3,7 @@ set -ex
 
 curl -o rustup-init https://static.rust-lang.org/rustup/dist/x86_64-unknown-linux-gnu/rustup-init
 chmod +x rustup-init
-./rustup-init -y --no-modify-path --default-toolchain nightly-2019-06-20
+./rustup-init -y --no-modify-path --default-toolchain stable
 export PATH="$HOME/.cargo/bin:$PATH"
 
 cd /io
