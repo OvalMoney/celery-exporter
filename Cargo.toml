@@ -9,10 +9,10 @@ name = "celery_state"
 crate-type = ["cdylib"]
 
 [dependencies.pyo3]
-version = "0.7.0"
+version = "0.12.4"
 features = ["extension-module"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-lru = "0.1.15"
+lru = "0.6.5"
