@@ -29,5 +29,5 @@ jobs:
         - pip install twine
       script:
         - maturin sdist
-        - docker run --rm -v `pwd`:/io quay.io/pypa/manylinux1_x86_64 /io/ci/build-wheels.sh
+        - docker run --rm -v $(pwd):/io konstin2/maturin build -o dist/
         - twine upload --skip-existing dist/*
