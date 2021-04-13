@@ -1,4 +1,3 @@
-sudo: false
 language: python
 
 python:
@@ -21,12 +20,11 @@ jobs:
   include:
     - stage: deploy
       if: tag IS present
-      sudo: required
       services:
         - docker
       env: TWINE_USERNAME=$PYPI_USER
            TWINE_PASSWORD=$PYPI_PASSWORD
-      before_script:
+      install:
         - pip install setuptools-rust==0.11.6 twine
       script:
         - python setup.py sdist
