@@ -233,7 +233,7 @@ impl CeleryState {
 }
 
 #[pymodule]
-fn celery_state(_py: Python, m: &PyModule) -> PyResult<()> {
+fn celery_exporter(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_class::<CeleryState>()?;
     Ok(())
 }

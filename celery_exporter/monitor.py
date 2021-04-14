@@ -8,7 +8,7 @@ import celery
 import celery.states
 
 from .metrics import TASKS, TASKS_RUNTIME, LATENCY, WORKERS
-from celery_state import CeleryState
+from .celery_exporter import CeleryState
 from .utils import get_config
 
 
