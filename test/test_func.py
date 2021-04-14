@@ -12,7 +12,7 @@ worker_thread_mock = MagicMock(spec=celery_exporter.monitor.WorkerMonitoringThre
 event_thread_mock = MagicMock(spec=celery_exporter.monitor.EnableEventsThread)
 
 
-@patch("celery.control.inspect.registered_tasks", {"worker1": [BaseTest.task]})
+@patch("celery.app.control.inspect.registered_tasks", {"worker1": [BaseTest.task]})
 @patch(
     "celery_exporter.core.prometheus_client.start_http_server", prom_http_server_mock
 )
