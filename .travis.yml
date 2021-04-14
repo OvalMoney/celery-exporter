@@ -26,8 +26,8 @@ jobs:
       env: TWINE_USERNAME=$PYPI_USER
            TWINE_PASSWORD=$PYPI_PASSWORD
       install:
-        - pip install twine
+        - pip install twine maturin==0.8.3
       script:
         - maturin sdist
-        - docker run --rm -v $(pwd):/io konstin2/maturin build -o dist/
+        - docker run --rm -v $(pwd):/io konstin2/maturin:v0.8.3 build --release -o dist/
         - twine upload --skip-existing dist/*
