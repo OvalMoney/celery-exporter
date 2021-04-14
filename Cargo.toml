@@ -31,6 +31,7 @@ classifier = [
     "Programming Language :: Python :: 3 :: Only",
     "Operating System :: OS Independent"
 ]
+requires-dist = ["click>=7", "celery>=4,<5", "prometheus_client>=0.0.20"]
 
 [package.metadata.maturin.scripts]
 celery-exporter = "celery_exporter.__main__:main"
