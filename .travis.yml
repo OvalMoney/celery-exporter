@@ -28,7 +28,7 @@ jobs:
       env: TWINE_USERNAME=$PYPI_USER
            TWINE_PASSWORD=$PYPI_PASSWORD
       before_script:
-        - pip install twine maturin
+        - pip install twine
       script:
         - maturin sdist
         - docker run --rm -v `pwd`:/io quay.io/pypa/manylinux1_x86_64 /io/ci/build-wheels.sh
