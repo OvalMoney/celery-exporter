@@ -1,7 +1,7 @@
 # Celery Exporter
 
 [![Travis CI](https://img.shields.io/travis/OvalMoney/celery-exporter.svg?style=flat)](https://travis-ci.org/OvalMoney/celery-exporter)
-[![Docker Hub](https://img.shields.io/docker/automated/ovalmoney/celery-exporter.svg?style=flat)](https://hub.docker.com/r/ovalmoney/celery-exporter/)
+[![Docker Hub](https://img.shields.io/docker/cloud/automated/ovalmoney/celery-exporter.svg?style=flat)](https://hub.docker.com/r/ovalmoney/celery-exporter/)
 
 Celery Exporter is a Prometheus metrics exporter for Celery 4, written in python.
 
@@ -20,7 +20,7 @@ Here the list of exposed metrics:
 
 
 ### Dependencies
-The project comes with `redis` lib already installed, you have to install any other dependency in case you are using other brokers. 
+The project comes with `redis` lib already installed, you have to install any other dependency in case you are using other brokers.
 
 ### Celery app
 Celery workers have to be configured to send task-related events:
