@@ -1,6 +1,6 @@
 [package]
 name = "celery_exporter"
-version = "1.4.0"
+version = "1.5.0"
 authors = ["Fabio Todaro <fbregist@gmail.com>", "Nicola Martino <mroci@bruttocarattere.org>"]
 description = "Prometheus metrics exporter for Celery"
 edition = "2018"
