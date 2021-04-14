@@ -28,7 +28,7 @@ COPY celery_exporter/  ./celery_exporter/
 RUN RUSTFLAGS="-C target-feature=-crt-static" maturin build --target x86_64-unknown-linux-musl --release --manylinux off -o /src/wheelhouse
 
 FROM base-image as app
-LABEL maintainer="Fabio Todaro <ft@ovalmoney.com>"
+LABEL maintainer="Fabio Todaro <fbregist@gmail.com>"
 
 ARG BUILD_DATE
 ARG DOCKER_REPO
