@@ -24,8 +24,10 @@ from celery_test_utils import BaseTest, get_celery_app
 class TestMockedCelery(BaseTest):
     def setUp(self):
         self.app = get_celery_app()
-        with patch("celery.app.control.inspect.conf") as tasks:
-            with patch("celery.app.control.inspect.registered_tasks") as registered:
+        with patch.object(celery.app.control.Inspect, "conf") as tasks:
+            with patch.object(
+                celery.app.control.Inspect, "registered_tasks"
+            ) as registered:
                 tasks.return_value = {
                     "celery@d6f95e9e24fc": {
                         "task_routes": {"my_task": {}, "trial": {"queue": "deadbeef"}}
