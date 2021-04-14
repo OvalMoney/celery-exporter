@@ -6,10 +6,15 @@ import threading
 
 import celery
 import celery.states
+import prometheus_client
 
-from .metrics import TASKS, TASKS_RUNTIME, LATENCY, WORKERS
 from celery_state import CeleryState
 from .utils import get_config
+
+TASKS = None
+WORKERS = None
+TASKS_RUNTIME = None
+LATENCY = None
 
 
 class TaskThread(threading.Thread):
@@ -18,11 +23,22 @@ class TaskThread(threading.Thread):
     exposed from Celery using its eventing system.
     """
 
-    def __init__(self, app, namespace, max_tasks_in_memory, *args, **kwargs):
+    def __init__(
+        self,
+        app,
+        namespace,
+        max_tasks_in_memory,
+        runtime_histogram_bucket,
+        latency_histogram_bucket,
+        *args,
+        **kwargs
+    ):
         self._app = app
         self._namespace = namespace
         self.log = logging.getLogger("task-thread")
         self._state = CeleryState(max_tasks_in_memory=max_tasks_in_memory)
+        self._runtime_histogram_bucket = runtime_histogram_bucket
+        self._latency_histogram_bucket = latency_histogram_bucket
         self._known_states = set()
         self._known_states_names = set()
         self._tasks_started = dict()
@@ -56,12 +72,22 @@ class TaskThread(threading.Thread):
                     recv = self._app.events.Receiver(
                         conn, handlers={"*": self._process_event}
                     )
-                    setup_metrics(self._app, self._namespace)
+                    setup_metrics(
+                        self._app,
+                        self._namespace,
+                        self._runtime_histogram_bucket,
+                        self._latency_histogram_bucket,
+                    )
                     self.log.info("Start capturing events...")
                     recv.capture(limit=None, timeout=None, wakeup=True)
             except Exception:
                 self.log.exception("Connection failed")
-                setup_metrics(self._app, self._namespace)
+                setup_metrics(
+                    self._app,
+                    self._namespace,
+                    self._runtime_histogram_bucket,
+                    self._latency_histogram_bucket,
+                )
                 time.sleep(5)
 
 
@@ -109,11 +135,41 @@ class EnableEventsThread(threading.Thread):
         self._app.control.enable_events()
 
 
-def setup_metrics(app, namespace):
+def setup_metrics(app, namespace, task_buckets, latency_buckets):
     """
     This initializes the available metrics with default values so that
     even before the first event is received, data can be exposed.
     """
+    global TASKS
+    global TASKS_RUNTIME
+    global LATENCY
+    global WORKERS
+
+    if TASKS == None:
+        TASKS = prometheus_client.Counter(
+            "celery_tasks_total",
+            "Number of task events.",
+            ["namespace", "name", "state", "queue"],
+        )
+    if TASKS_RUNTIME == None:
+        TASKS_RUNTIME = prometheus_client.Histogram(
+            "celery_tasks_runtime_seconds",
+            "Task runtime.",
+            ["namespace", "name", "queue"],
+            buckets=task_buckets,
+        )
+    if LATENCY == None:
+        LATENCY = prometheus_client.Histogram(
+            "celery_tasks_latency_seconds",
+            "Time between a task is received and started.",
+            ["namespace", "name", "queue"],
+            buckets=latency_buckets,
+        )
+    if WORKERS == None:
+        WORKERS = prometheus_client.Gauge(
+            "celery_workers", "Number of alive workers", ["namespace"]
+        )
+
     WORKERS.labels(namespace=namespace)
     config = get_config(app)
 

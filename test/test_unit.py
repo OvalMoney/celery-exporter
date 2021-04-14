@@ -5,7 +5,7 @@ import celery.states
 
 from celery.events import Event
 from celery.utils import uuid
-from prometheus_client import REGISTRY
+from prometheus_client import REGISTRY, Histogram
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -36,7 +36,12 @@ class TestMockedCelery(BaseTest):
                     "celery@12311847jsa2": {},
                 }
                 registered.return_value = {"celery@d6f95e9e24fc": [self.task, "trial"]}
-                setup_metrics(self.app, self.namespace)  # reset metrics
+                setup_metrics(
+                    self.app,
+                    self.namespace,
+                    task_buckets=Histogram.DEFAULT_BUCKETS,
+                    latency_buckets=Histogram.DEFAULT_BUCKETS,
+                )  # reset metrics
 
     def test_initial_metric_values(self):
         self._assert_task_states(celery.states.ALL_STATES, 0)
@@ -116,7 +121,11 @@ class TestMockedCelery(BaseTest):
         runtime = 234.5
 
         m = TaskThread(
-            app=self.app, namespace=self.namespace, max_tasks_in_memory=self.max_tasks
+            app=self.app,
+            namespace=self.namespace,
+            max_tasks_in_memory=self.max_tasks,
+            runtime_histogram_bucket=Histogram.DEFAULT_BUCKETS,
+            latency_histogram_bucket=Histogram.DEFAULT_BUCKETS,
         )
 
         self._assert_task_states(celery.states.ALL_STATES, 0)

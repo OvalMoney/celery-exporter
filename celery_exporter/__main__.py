@@ -7,10 +7,12 @@ import time
 
 import click
 from .core import CeleryExporter
+from prometheus_client import Histogram
 
 __VERSION__ = (2, 0, 0)
 
 LOG_FORMAT = "[%(asctime)s] %(name)s:%(levelname)s: %(message)s"
+DEFAULT_BUCKETS = ",".join(map(str, Histogram.DEFAULT_BUCKETS))
 
 
 @click.command(context_settings={"auto_envvar_prefix": "CELERY_EXPORTER"})
@@ -63,6 +65,22 @@ LOG_FORMAT = "[%(asctime)s] %(name)s:%(levelname)s: %(message)s"
     help="Periodically enable Celery events.",
 )
 @click.option(
+    "--runtime-histogram-bucket",
+    type=str,
+    show_default=True,
+    show_envvar=True,
+    default=DEFAULT_BUCKETS,
+    help="Default buckets of runtime historgram in seconds",
+)
+@click.option(
+    "--latency-histogram-bucket",
+    type=str,
+    show_default=True,
+    show_envvar=True,
+    default=DEFAULT_BUCKETS,
+    help="Default buckets of latency historgram in seconds.",
+)
+@click.option(
     "--tz", type=str, allow_from_autoenv=False, help="Timezone used by the celery app."
 )
 @click.option(
@@ -76,6 +94,8 @@ def main(
     namespace,
     transport_options,
     enable_events,
+    runtime_histogram_bucket,
+    latency_histogram_bucket,
     tz,
     verbose,
 ):  # pragma: no cover
@@ -101,6 +121,31 @@ def main(
             )
             sys.exit(1)
 
+    def decode_buckets(buckets_list):
+        return tuple(map(float, buckets_list.split(",")))
+
+    try:
+        runtime_histogram_bucket = decode_buckets(runtime_histogram_bucket)
+    except ValueError:
+        print(
+            "Error parsing runtime_histogram_bucket options '{}' must be a comma sperated list of numbers".format(
+                runtime_histogram_bucket
+            ),
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    try:
+        latency_histogram_bucket = decode_buckets(latency_histogram_bucket)
+    except ValueError:
+        print(
+            "Error parsing latency_histogram_bucket options '{}' must be a comma sperated list of numbers".format(
+                latency_histogram_bucket
+            ),
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     celery_exporter = CeleryExporter(
         broker_url,
         listen_address,
@@ -108,6 +153,8 @@ def main(
         namespace,
         transport_options,
         enable_events,
+        runtime_histogram_bucket,
+        latency_histogram_bucket,
     )
     celery_exporter.start()
 
