@@ -29,5 +29,5 @@ jobs:
         - pip install twine maturin==0.8.3
       script:
         - maturin sdist
-        - docker run --rm -v $(pwd):/io konstin2/maturin build -o dist/
+        - docker run --rm -v $(pwd):/io konstin2/maturin build --release -o dist/
         - twine upload --skip-existing dist/*
