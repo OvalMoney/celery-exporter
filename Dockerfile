@@ -48,7 +48,7 @@ WORKDIR /app/
 COPY --from=build-rs /src/wheelhouse/ /app/wheelhouse/
 
 COPY requirements/ ./requirements
-RUN pip install -r ./requirements/requirements.txt
+RUN pip install -r ./requirements/requirements_celery4.txt
 
 RUN pip install wheelhouse/*
 

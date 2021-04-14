@@ -4,6 +4,7 @@ from celery_test_utils import BaseTest
 import celery
 import celery_exporter.monitor
 from celery_exporter.core import CeleryExporter
+from celery.app.control import Inspect
 
 prom_http_server_mock = MagicMock(return_value=None)
 setup_metrics_mock = MagicMock(return_value=None)
@@ -12,7 +13,7 @@ worker_thread_mock = MagicMock(spec=celery_exporter.monitor.WorkerMonitoringThre
 event_thread_mock = MagicMock(spec=celery_exporter.monitor.EnableEventsThread)
 
 
-@patch("celery.task.control.inspect.registered_tasks", {"worker1": [BaseTest.task]})
+@patch.object(Inspect, "registered_tasks", {"worker1": [BaseTest.task]})
 @patch(
     "celery_exporter.core.prometheus_client.start_http_server", prom_http_server_mock
 )
