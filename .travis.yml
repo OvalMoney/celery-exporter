@@ -25,7 +25,7 @@ jobs:
         - docker
       env: TWINE_USERNAME=$PYPI_USER
            TWINE_PASSWORD=$PYPI_PASSWORD
-      before_script:
+      install:
         - pip install twine
       script:
         - maturin sdist
