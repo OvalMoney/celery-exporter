@@ -1,4 +1,6 @@
+import ssl
 from itertools import chain
+from urllib.parse import urlparse
 
 CELERY_DEFAULT_QUEUE = "celery"
 CELERY_MISSING_DATA = "undefined"
@@ -40,3 +42,37 @@ def get_config(app):
             else:
                 res[task_name] = default
     return res
+
+
+def get_transport_scheme(broker_url):
+    return urlparse(broker_url)[0]
+
+
+def generate_broker_use_ssl(
+    use_ssl, broker_scheme, ssl_verify, ssl_ca_certs, ssl_certfile, ssl_keyfile
+):
+    scheme_map = {"redis": "ssl_", "amqp": ""}
+
+    verify_map = {
+        "CERT_NONE": ssl.CERT_NONE,
+        "CERT_OPTIONAL": ssl.CERT_OPTIONAL,
+        "CERT_REQUIRED": ssl.CERT_REQUIRED,
+    }
+
+    if not use_ssl:
+        return None
+
+    if broker_scheme not in list(scheme_map.keys()):
+        raise ValueError(f"Unsupported transport for SSL: {broker_scheme}")
+
+    if ssl_verify not in list(verify_map.keys()):
+        raise ValueError(f"Unsupported ssl_verify argument: {ssl_verify}")
+
+    prefix = scheme_map.get(broker_scheme)
+
+    return {
+        f"{prefix}keyfile": ssl_keyfile,
+        f"{prefix}certfile": ssl_certfile,
+        f"{prefix}ca_certs": ssl_ca_certs,
+        f"{prefix}cert_reqs": verify_map.get(ssl_verify),
+    }
