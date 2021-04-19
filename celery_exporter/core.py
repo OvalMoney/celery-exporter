@@ -3,8 +3,12 @@ import logging
 import celery
 import prometheus_client
 
-from .monitor import (EnableEventsThread, TaskThread, WorkerMonitoringThread,
-                      setup_metrics)
+from .monitor import (
+    EnableEventsThread,
+    TaskThread,
+    WorkerMonitoringThread,
+    setup_metrics,
+)
 
 __all__ = ("CeleryExporter",)
 
