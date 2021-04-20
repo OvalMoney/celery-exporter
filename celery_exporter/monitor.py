@@ -1,14 +1,14 @@
 import collections
-from itertools import chain
 import logging
-import time
 import threading
+import time
+from itertools import chain
 
 import celery
 import celery.states
 
-from .metrics import TASKS, TASKS_RUNTIME, LATENCY, WORKERS
 from .celery_exporter import CeleryState
+from .metrics import LATENCY, TASKS, TASKS_RUNTIME, WORKERS
 from .utils import get_config
 
 

@@ -1,10 +1,12 @@
-import celery
 import logging
+
+import celery
 import prometheus_client
+
 from .monitor import (
+    EnableEventsThread,
     TaskThread,
     WorkerMonitoringThread,
-    EnableEventsThread,
     setup_metrics,
 )
 
@@ -20,13 +22,14 @@ class CeleryExporter:
         namespace="celery",
         transport_options=None,
         enable_events=False,
+        broker_use_ssl=None,
     ):
         self._listen_address = listen_address
         self._max_tasks = max_tasks
         self._namespace = namespace
         self._enable_events = enable_events
 
-        self._app = celery.Celery(broker=broker_url)
+        self._app = celery.Celery(broker=broker_url, broker_use_ssl=broker_use_ssl)
         self._app.conf.broker_transport_options = transport_options or {}
 
     def start(self):

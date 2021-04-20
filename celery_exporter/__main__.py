@@ -6,9 +6,9 @@ import sys
 import time
 
 import click
-from .core import CeleryExporter
 
-__VERSION__ = (2, 0, 0)
+from .core import CeleryExporter
+from .utils import generate_broker_use_ssl, get_transport_scheme
 
 LOG_FORMAT = "[%(asctime)s] %(name)s:%(levelname)s: %(message)s"
 
@@ -63,12 +63,45 @@ LOG_FORMAT = "[%(asctime)s] %(name)s:%(levelname)s: %(message)s"
     help="Periodically enable Celery events.",
 )
 @click.option(
+    "--use-ssl",
+    is_flag=True,
+    help="Enable SSL usage on broker connection if redis or amqp.",
+)
+@click.option(
+    "--ssl-verify",
+    type=click.Choice(
+        ["CERT_NONE", "CERT_OPTIONAL", "CERT_REQUIRED"], case_sensitive=True
+    ),
+    default="CERT_REQUIRED",
+    help="SSL verify mode.",
+)
+@click.option(
+    "--ssl-ca-certs",
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=False, writable=False, readable=True
+    ),
+    help="SSL path to the CA certificate.",
+)
+@click.option(
+    "--ssl-certfile",
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=False, writable=False, readable=True
+    ),
+    help="SSL path to the Client Certificate.",
+)
+@click.option(
+    "--ssl-keyfile",
+    type=click.Path(
+        exists=True, file_okay=True, dir_okay=False, writable=False, readable=True
+    ),
+    help="SSL path to the Client Key.",
+)
+@click.option(
     "--tz", type=str, allow_from_autoenv=False, help="Timezone used by the celery app."
 )
 @click.option(
     "--verbose", is_flag=True, allow_from_autoenv=False, help="Enable verbose logging."
 )
-@click.version_option(version=".".join([str(x) for x in __VERSION__]))
 def main(
     broker_url,
     listen_address,
@@ -76,6 +109,11 @@ def main(
     namespace,
     transport_options,
     enable_events,
+    use_ssl,
+    ssl_verify,
+    ssl_ca_certs,
+    ssl_certfile,
+    ssl_keyfile,
     tz,
     verbose,
 ):  # pragma: no cover
@@ -93,13 +131,21 @@ def main(
         try:
             transport_options = json.loads(transport_options)
         except ValueError:
-            print(
+            logging.error(
                 "Error parsing broker transport options from JSON '{}'".format(
                     transport_options
-                ),
-                file=sys.stderr,
+                )
             )
             sys.exit(1)
+
+    broker_use_ssl = generate_broker_use_ssl(
+        use_ssl,
+        get_transport_scheme(broker_url),
+        ssl_verify,
+        ssl_ca_certs,
+        ssl_certfile,
+        ssl_keyfile,
+    )
 
     celery_exporter = CeleryExporter(
         broker_url,
@@ -108,7 +154,9 @@ def main(
         namespace,
         transport_options,
         enable_events,
+        broker_use_ssl,
     )
+
     celery_exporter.start()
 
     def shutdown(signum, frame):  # pragma: no cover
