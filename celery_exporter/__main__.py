@@ -53,7 +53,7 @@ LOG_FORMAT = "[%(asctime)s] %(name)s:%(levelname)s: %(message)s"
 @click.option(
     "--transport-options",
     type=str,
-    allow_from_autoenv=False,
+    show_envvar=True,
     help="JSON object with additional options passed to the underlying transport.",
 )
 @click.option(
