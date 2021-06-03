@@ -12,7 +12,6 @@ from .utils import generate_broker_use_ssl, get_transport_scheme
 
 LOG_FORMAT = "[%(asctime)s] %(name)s:%(levelname)s: %(message)s"
 
-
 @click.command(context_settings={"auto_envvar_prefix": "CELERY_EXPORTER"})
 @click.option(
     "--broker-url",
@@ -55,6 +54,12 @@ LOG_FORMAT = "[%(asctime)s] %(name)s:%(levelname)s: %(message)s"
     type=str,
     allow_from_autoenv=False,
     help="JSON object with additional options passed to the underlying transport.",
+)
+@click.option(
+    "--route-options",
+    type=str,
+    allow_from_autoenv=False,
+    help="JSON object with additional options passed to the underlying route.",
 )
 @click.option(
     "--enable-events",
@@ -108,6 +113,7 @@ def main(
     max_tasks,
     namespace,
     transport_options,
+    route_options,
     enable_events,
     use_ssl,
     ssl_verify,
@@ -137,6 +143,17 @@ def main(
                 )
             )
             sys.exit(1)
+    
+    if route_options:
+        try:
+            route_option = json.loads(route_options)
+        except ValueError:
+            logging.error(
+                "Error parsing broker transport options from JSON '{}'".format(
+                    route_options
+                )
+            )
+            sys.exit(1)
 
     broker_use_ssl = generate_broker_use_ssl(
         use_ssl,
@@ -153,6 +170,7 @@ def main(
         max_tasks,
         namespace,
         transport_options,
+        route_options,
         enable_events,
         broker_use_ssl,
     )
