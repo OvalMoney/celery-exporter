@@ -37,7 +37,7 @@ def get_config(app):
                 res[task_name] = default
                 for i in task_wildcard_names:
                     if i in routes:
-                        if 'queue' in routes[i]:
+                        if 'queue' in routes:
                             res[task_name] = routes[i]['queue']
                         else:
                             res[task_name] = routes[i]
