@@ -23,6 +23,7 @@ class CeleryExporter:
         transport_options=None,
         enable_events=False,
         broker_use_ssl=None,
+        route_options=None
     ):
         self._listen_address = listen_address
         self._max_tasks = max_tasks
@@ -31,6 +32,8 @@ class CeleryExporter:
 
         self._app = celery.Celery(broker=broker_url, broker_use_ssl=broker_use_ssl)
         self._app.conf.broker_transport_options = transport_options or {}
+        if route_options:
+            self._app.conf.task_routes = route_options
 
     def start(self):
 
