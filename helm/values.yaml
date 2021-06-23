@@ -27,6 +27,14 @@ env:
 command:
   - celery-exporter
 
+serviceMonitor:
+  enable: false
+  endpoints:
+    - interval: 30s
+      path: /metrics
+      port: http
+      scrapeTimeout: 15s
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
