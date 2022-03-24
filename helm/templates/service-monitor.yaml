@@ -1,0 +1,20 @@
+{{- if .Values.serviceMonitor.enable }}
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "celery-exporter.fullname" . }}
+  labels:
+    {{- include "celery-exporter.labels" . | nindent 4 }}
+{{- with .Values.serviceMonitor.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+{{- end }}
+spec:
+  endpoints:
+{{- toYaml .Values.serviceMonitor.endpoints | nindent 4 }}
+  jobLabel: {{ include "celery-exporter.fullname" . }}
+  selector:
+    matchLabels:
+      {{- include "celery-exporter.selectorLabels" . | nindent 6 }}
+{{- end }}
