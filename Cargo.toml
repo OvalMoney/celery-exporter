@@ -20,7 +20,7 @@ features = ["extension-module"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-lru = "0.6.5"
+lru = "0.7.1"
 
 [package.metadata.maturin]
 classifier = [
