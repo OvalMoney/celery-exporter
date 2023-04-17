@@ -18,9 +18,10 @@ class TaskThread(threading.Thread):
     exposed from Celery using its eventing system.
     """
 
-    def __init__(self, app, namespace, max_tasks_in_memory, *args, **kwargs):
+    def __init__(self, app, namespace, max_tasks_in_memory, queue, *args, **kwargs):
         self._app = app
         self._namespace = namespace
+        self._queue = queue
         self.log = logging.getLogger("task-thread")
         self._state = CeleryState(max_tasks_in_memory=max_tasks_in_memory)
         self._known_states = set()
@@ -56,12 +57,12 @@ class TaskThread(threading.Thread):
                     recv = self._app.events.Receiver(
                         conn, handlers={"*": self._process_event}
                     )
-                    setup_metrics(self._app, self._namespace)
+                    setup_metrics(self._app, self._namespace, self._queue)
                     self.log.info("Start capturing events...")
                     recv.capture(limit=None, timeout=None, wakeup=True)
             except Exception:
                 self.log.exception("Connection failed")
-                setup_metrics(self._app, self._namespace)
+                setup_metrics(self._app, self._namespace, self._queue)
                 time.sleep(5)
 
 
@@ -109,13 +110,13 @@ class EnableEventsThread(threading.Thread):
         self._app.control.enable_events()
 
 
-def setup_metrics(app, namespace):
+def setup_metrics(app, namespace, queue='celery'):
     """
     This initializes the available metrics with default values so that
     even before the first event is received, data can be exposed.
     """
     WORKERS.labels(namespace=namespace)
-    config = get_config(app)
+    config = get_config(app, queue=queue)
 
     if not config:  # pragma: no cover
         for metric in TASKS.collect():

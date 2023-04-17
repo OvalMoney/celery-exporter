@@ -11,7 +11,7 @@ from .core import CeleryExporter
 from .utils import generate_broker_use_ssl, get_transport_scheme
 
 LOG_FORMAT = "[%(asctime)s] %(name)s:%(levelname)s: %(message)s"
-
+CELERY_DEFAULT_QUEUE = "celery"
 
 @click.command(context_settings={"auto_envvar_prefix": "CELERY_EXPORTER"})
 @click.option(
@@ -102,6 +102,15 @@ LOG_FORMAT = "[%(asctime)s] %(name)s:%(levelname)s: %(message)s"
 @click.option(
     "--verbose", is_flag=True, allow_from_autoenv=False, help="Enable verbose logging."
 )
+@click.option(
+    "--queue",
+    "-q",
+    type=str,
+    show_default=True,
+    show_envvar=True,
+    default=CELERY_DEFAULT_QUEUE,
+    help="Queue name for metrics.",
+)
 def main(
     broker_url,
     listen_address,
@@ -116,6 +125,7 @@ def main(
     ssl_keyfile,
     tz,
     verbose,
+    queue,
 ):  # pragma: no cover
 
     if verbose:
@@ -155,6 +165,7 @@ def main(
         transport_options,
         enable_events,
         broker_use_ssl,
+        queue,
     )
 
     celery_exporter.start()

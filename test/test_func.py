@@ -28,6 +28,7 @@ class TestCeleryExporter(BaseTest):
             max_tasks=TestCeleryExporter.max_tasks,
             namespace=TestCeleryExporter.namespace,
             enable_events=True,
+            queue='celery',
         )
 
     def test_setup_metrics(self):

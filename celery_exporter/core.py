@@ -23,6 +23,7 @@ class CeleryExporter:
         transport_options=None,
         enable_events=False,
         broker_use_ssl=None,
+        queue='celery',
     ):
         self._listen_address = listen_address
         self._max_tasks = max_tasks
@@ -31,10 +32,11 @@ class CeleryExporter:
 
         self._app = celery.Celery(broker=broker_url, broker_use_ssl=broker_use_ssl)
         self._app.conf.broker_transport_options = transport_options or {}
+        self._queue = queue
 
     def start(self):
 
-        setup_metrics(self._app, self._namespace)
+        setup_metrics(self._app, self._namespace, self._queue)
 
         self._start_httpd()
 
@@ -42,6 +44,7 @@ class CeleryExporter:
             app=self._app,
             namespace=self._namespace,
             max_tasks_in_memory=self._max_tasks,
+            queue=self._queue
         )
         t.daemon = True
         t.start()
