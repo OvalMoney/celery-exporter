@@ -102,6 +102,15 @@ LOG_FORMAT = "[%(asctime)s] %(name)s:%(levelname)s: %(message)s"
 @click.option(
     "--verbose", is_flag=True, allow_from_autoenv=False, help="Enable verbose logging."
 )
+@click.option(
+    "--queue",
+    "-q",
+    type=str,
+    show_default=True,
+    show_envvar=True,
+    default="celery",
+    help="Queue name for metrics.",
+)
 def main(
     broker_url,
     listen_address,
@@ -116,6 +125,7 @@ def main(
     ssl_keyfile,
     tz,
     verbose,
+    queue,
 ):  # pragma: no cover
 
     if verbose:
@@ -155,6 +165,7 @@ def main(
         transport_options,
         enable_events,
         broker_use_ssl,
+        queue,
     )
 
     celery_exporter.start()

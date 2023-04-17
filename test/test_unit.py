@@ -36,7 +36,7 @@ class TestMockedCelery(BaseTest):
                     "celery@12311847jsa2": {},
                 }
                 registered.return_value = {"celery@d6f95e9e24fc": [self.task, "trial"]}
-                setup_metrics(self.app, self.namespace)  # reset metrics
+                setup_metrics(self.app, self.namespace, queue=self.queue)  # reset metrics
 
     def test_initial_metric_values(self):
         self._assert_task_states(celery.states.ALL_STATES, 0)
@@ -70,7 +70,7 @@ class TestMockedCelery(BaseTest):
         )
 
         with patch.object(self.app.control, "ping") as mock_ping:
-            w = WorkerMonitoringThread(app=self.app, namespace=self.namespace)
+            w = WorkerMonitoringThread(app=self.app, namespace=self.namespace, queue=self.queue)
 
             mock_ping.return_value = []
             w.update_workers_count()
@@ -116,7 +116,7 @@ class TestMockedCelery(BaseTest):
         runtime = 234.5
 
         m = TaskThread(
-            app=self.app, namespace=self.namespace, max_tasks_in_memory=self.max_tasks
+            app=self.app, namespace=self.namespace, max_tasks_in_memory=self.max_tasks, queue=self.queue
         )
 
         self._assert_task_states(celery.states.ALL_STATES, 0)

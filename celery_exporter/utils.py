@@ -15,7 +15,7 @@ def _gen_wildcards(name):
     return res
 
 
-def get_config(app):
+def get_config(app, queue=CELERY_DEFAULT_QUEUE):
     res = dict()
     try:
         registered_tasks = app.control.inspect().registered_tasks().values()
@@ -26,7 +26,7 @@ def get_config(app):
     default_queues = []
     for task_name in set(chain.from_iterable(registered_tasks)):
         for conf in confs.values():
-            default = conf.get("task_default_queue", CELERY_DEFAULT_QUEUE)
+            default = conf.get("task_default_queue", queue)
             default_queues.append(default)
             if task_name in res and res[task_name] not in default_queues:
                 break
