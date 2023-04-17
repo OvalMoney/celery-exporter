@@ -11,7 +11,7 @@ from .core import CeleryExporter
 from .utils import generate_broker_use_ssl, get_transport_scheme
 
 LOG_FORMAT = "[%(asctime)s] %(name)s:%(levelname)s: %(message)s"
-
+CELERY_DEFAULT_QUEUE = "celery"
 
 @click.command(context_settings={"auto_envvar_prefix": "CELERY_EXPORTER"})
 @click.option(
@@ -108,7 +108,7 @@ LOG_FORMAT = "[%(asctime)s] %(name)s:%(levelname)s: %(message)s"
     type=str,
     show_default=True,
     show_envvar=True,
-    default="celery",
+    default=CELERY_DEFAULT_QUEUE,
     help="Queue name for metrics.",
 )
 def main(

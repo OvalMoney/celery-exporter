@@ -2,7 +2,6 @@ import ssl
 from itertools import chain
 from urllib.parse import urlparse
 
-CELERY_DEFAULT_QUEUE = "celery"
 CELERY_MISSING_DATA = "undefined"
 
 
@@ -15,7 +14,7 @@ def _gen_wildcards(name):
     return res
 
 
-def get_config(app, queue=CELERY_DEFAULT_QUEUE):
+def get_config(app, queue):
     res = dict()
     try:
         registered_tasks = app.control.inspect().registered_tasks().values()
