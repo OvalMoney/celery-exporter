@@ -70,10 +70,9 @@ class WorkerMonitoringThread(threading.Thread):
     celery_ping_timeout_seconds = 5
     periodicity_seconds = 5
 
-    def __init__(self, app, namespace, queue, *args, **kwargs):
+    def __init__(self, app, namespace, *args, **kwargs):
         self._app = app
         self._namespace = namespace
-        self._queue = queue
         self.log = logging.getLogger("workers-thread")
         super(WorkerMonitoringThread, self).__init__(*args, **kwargs)
 
@@ -94,9 +93,8 @@ class WorkerMonitoringThread(threading.Thread):
 class EnableEventsThread(threading.Thread):
     periodicity_seconds = 5
 
-    def __init__(self, app, queue, *args, **kwargs):  # pragma: no cover
+    def __init__(self, app, *args, **kwargs):  # pragma: no cover
         self._app = app
-        self._queue = queue
         self.log = logging.getLogger("enable-events-thread")
         super(EnableEventsThread, self).__init__(*args, **kwargs)
 

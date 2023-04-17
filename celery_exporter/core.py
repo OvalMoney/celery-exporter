@@ -49,12 +49,12 @@ class CeleryExporter:
         t.daemon = True
         t.start()
 
-        w = WorkerMonitoringThread(app=self._app, namespace=self._namespace, queue=self._queue)
+        w = WorkerMonitoringThread(app=self._app, namespace=self._namespace)
         w.daemon = True
         w.start()
 
         if self._enable_events:
-            e = EnableEventsThread(app=self._app, queue=self._queue)
+            e = EnableEventsThread(app=self._app)
             e.daemon = True
             e.start()
 
